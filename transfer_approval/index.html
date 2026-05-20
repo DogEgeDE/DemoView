@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>费用转账申请审批 - 可点击原型</title>
+    <link rel="stylesheet" href="./assets/css/app.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sider">
+        <div class="sider__brand">
+          <div class="brand-lockup">
+            <div class="brand-mark">Z</div>
+            <div class="brand-text">
+              <div class="brand-text__title">智慧研学运营后台</div>
+              <div class="brand-text__sub">Finance Prototype</div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="menu" aria-label="侧边菜单">
+          <a class="menu__item" href="javascript:void(0)">课后服务消费课</a>
+          <a class="menu__item" href="javascript:void(0)">月度对账单</a>
+          <a class="menu__item is-active" href="javascript:void(0)">转账与审批</a>
+          <a class="menu__item" href="javascript:void(0)">结算审批</a>
+          <a class="menu__item" href="javascript:void(0)">服务费审批</a>
+          <div class="menu__divider"></div>
+          <a class="menu__item" href="javascript:void(0)">收款账户管理</a>
+          <a class="menu__item" href="javascript:void(0)">结算账户管理</a>
+          <a class="menu__item" href="javascript:void(0)">签约管理</a>
+          <a class="menu__item" href="javascript:void(0)">合同管理</a>
+        </nav>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <div class="crumbs" aria-label="面包屑">
+            <span class="crumbs__home" title="首页">⌂</span>
+            <span class="crumbs__sep">/</span>
+            <span class="crumbs__item">财务中心</span>
+            <span class="crumbs__sep">/</span>
+            <span class="crumbs__item is-current">转账与审批</span>
+          </div>
+
+          <div class="topbar__right">
+            <div class="role-mini">
+              <span class="role-mini__label">角色</span>
+              <select id="role" class="select select--mini">
+                <option value="ops">平台运营</option>
+                <option value="county_finance">区县财务</option>
+                <option value="city_finance">市局财务</option>
+                <option value="city_cashier">市局出纳</option>
+              </select>
+            </div>
+            <button id="btnResetData" class="btn btn--ghost btn--mini" type="button">重置数据</button>
+            <button class="icon-btn" type="button" title="全屏（示意）">⛶</button>
+            <div class="avatar" title="当前用户">杨</div>
+          </div>
+        </header>
+
+        <section class="page">
+          <div id="toast" class="toast" hidden></div>
+
+          <div class="card card--filters">
+            <div class="filter-row">
+              <div class="field-inline">
+                <div class="field-inline__label">付款账户</div>
+                <select id="fPayBank" class="select">
+                  <option value="邮储" selected>邮储</option>
+                  <option value="工行">工行</option>
+                  <option value="建行">建行</option>
+                </select>
+                <select id="fPayAccount" class="select">
+                  <option value="天中教育监管户" selected>天中教育监管户</option>
+                </select>
+              </div>
+              <div class="row-actions">
+                <button id="btnApply" class="btn btn--primary" type="button">转账申请</button>
+              </div>
+            </div>
+
+            <div class="filter-row">
+              <div class="field-inline">
+                <div class="field-inline__label">申请时间</div>
+                <input id="fStart" class="input" type="date" />
+                <span class="range-sep">—</span>
+                <input id="fEnd" class="input" type="date" />
+              </div>
+
+              <div class="field-inline">
+                <div class="field-inline__label">状态</div>
+                <select id="fStatus" class="select">
+                  <option value="">请选择</option>
+                </select>
+              </div>
+
+              <div class="field-inline field-inline--grow">
+                <div class="field-inline__label">转账目标账户</div>
+                <input id="fTarget" class="input" type="text" placeholder="请输入目标账户名称..." />
+              </div>
+
+              <div class="row-actions">
+                <button id="btnResetFilters" class="btn btn--ghost" type="button">重置</button>
+                <button id="btnSearch" class="btn btn--primary" type="button">查询</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card--table">
+            <div class="table-head">
+              <div class="count">共 <b id="count">0</b> 条记录</div>
+              <div class="table-actions">
+                <button id="btnExport" class="btn btn--primary btn--with-icon" type="button">
+                  <span class="btn__icon">⬇</span>导出
+                </button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table" aria-label="转账列表">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;">序号</th>
+                    <th style="min-width: 200px;">转账目标账户</th>
+                    <th style="min-width: 220px;">转账目标账号</th>
+                    <th style="width: 140px;">转账金额</th>
+                    <th style="width: 130px;">状态</th>
+                    <th style="width: 140px;">申请人</th>
+                    <th style="min-width: 220px;">备注</th>
+                    <th style="width: 120px;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+
+              <div id="empty" class="empty" hidden>
+                <div class="empty__icon">🗂</div>
+                <div class="empty__text">暂无数据</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 申请转账弹窗（按截图样式） -->
+    <div id="modalMask" class="modal-mask" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="申请转账">
+        <div class="modal__head">
+          <div class="modal__title">申请转账</div>
+          <button id="modalClose" class="icon-btn icon-btn--close" type="button" aria-label="关闭">×</button>
+        </div>
+
+        <form id="applyForm" class="modal__body">
+          <div class="form-row">
+            <label class="form-label"><span class="req">*</span>目标教育局</label>
+            <select id="mTarget" class="select select--block">
+              <option value="">请选择</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">付款账户（固定）</label>
+            <input id="mPayer" class="input input--block" type="text" readonly value="邮储 · 天中教育监管户" />
+          </div>
+
+          <div class="form-row">
+            <label class="form-label"><span class="req">*</span>收款账户</label>
+            <div class="field-inline" style="gap:10px;">
+              <select id="mPayeeBank" class="select" style="min-width: 180px;">
+                <option value="邮储" selected>邮储</option>
+                <option value="工行">工行</option>
+                <option value="建行">建行</option>
+              </select>
+              <select id="mPayeeAccount" class="select select--block" style="min-width: 280px;">
+                <option value="">请选择收款账户</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label"><span class="req">*</span>转账金额</label>
+            <div class="input-suffix">
+              <input id="mAmount" class="input input--block" type="number" min="0" step="0.01" placeholder="请输入转账金额" />
+              <span class="suffix">元</span>
+            </div>
+            <div class="form-tip">金额校验/额度提示可后续接真实规则；当前为原型演示。</div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">备注说明（≤200字）</label>
+            <textarea id="mRemark" class="input input--block" style="height:90px;padding:8px 10px;line-height:1.4;" maxlength="200" placeholder="请输入备注说明（非必填）"></textarea>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label"><span class="req">*</span>市局资料</label>
+            <div class="upload-line">
+              <input id="mCityFiles" class="file-input" type="file" multiple
+                accept=".zip,.doc,.docx,.xls,.xlsx,.pdf,.png,.jpg,.jpeg" />
+              <button id="btnUploadCity" class="btn btn--primary btn--mini" type="button">上传附件</button>
+              <div id="mCityFileList" class="file-list"></div>
+            </div>
+            <div class="form-tip">支持：zip、word、excel、pdf、png、jpeg。</div>
+          </div>
+
+          <div id="countyUploadRow" class="form-row">
+            <label class="form-label"><span class="req">*</span>区县资料（目标=区县时必传）</label>
+            <div class="upload-line">
+              <input id="mCountyFiles" class="file-input" type="file" multiple
+                accept=".zip,.doc,.docx,.xls,.xlsx,.pdf,.png,.jpg,.jpeg" />
+              <button id="btnUploadCounty" class="btn btn--primary btn--mini" type="button">上传附件</button>
+              <div id="mCountyFileList" class="file-list"></div>
+            </div>
+            <div class="form-tip">支持：zip、word、excel、pdf、png、jpeg。</div>
+          </div>
+
+          <div class="modal__foot">
+            <button id="modalCancel" class="btn btn--ghost" type="button">取消</button>
+            <button id="modalSubmit" class="btn btn--primary" type="submit">提交申请</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 详情抽屉（用于审批/查看，样式与截图同一体系） -->
+    <div id="drawerMask" class="drawer-mask" hidden>
+      <div class="drawer" role="dialog" aria-modal="true" aria-label="申请详情">
+        <div class="drawer__head">
+          <div class="drawer__title" id="drawerTitle">申请详情</div>
+          <button id="drawerClose" class="icon-btn icon-btn--close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div id="drawerBody" class="drawer__body"></div>
+      </div>
+    </div>
+
+    <!-- 审批驳回理由弹窗（区县/市局财务） -->
+    <div id="rejectMask" class="modal-mask" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="填写驳回理由">
+        <div class="modal__head">
+          <div class="modal__title">驳回</div>
+          <button id="rejectClose" class="icon-btn icon-btn--close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="modal__body">
+          <div class="form-row">
+            <label class="form-label"><span class="req">*</span>驳回理由（≤200字）</label>
+            <textarea id="rejectReason" class="input input--block" style="height:110px;padding:8px 10px;line-height:1.4;" maxlength="200" placeholder="请输入驳回理由"></textarea>
+            <div class="form-tip">驳回理由必填，将在详情中展示。</div>
+          </div>
+          <div class="modal__foot">
+            <button id="rejectCancel" class="btn btn--ghost" type="button">取消</button>
+            <button id="rejectConfirm" class="btn btn--primary" type="button">确认驳回</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 出纳转账弹窗（按截图样式） -->
+    <div id="transferMask" class="modal-mask" hidden>
+      <div class="modal modal--wide" role="dialog" aria-modal="true" aria-label="转账">
+        <div class="modal__head">
+          <div class="modal__title">转账</div>
+          <button id="transferClose" class="icon-btn icon-btn--close" type="button" aria-label="关闭">×</button>
+        </div>
+
+        <div class="modal__body">
+          <div class="transfer-meta">
+            <div class="transfer-meta__item"><span class="muted">申请单号：</span><b id="tId">—</b></div>
+            <div class="transfer-meta__item"><span class="muted">申请人：</span><b id="tApplicant">—</b></div>
+            <div class="transfer-meta__item"><span class="muted">申请时间：</span><b id="tCreatedAt">—</b></div>
+            <div class="transfer-meta__item"><span class="muted">审批时间：</span><b id="tApprovedAt">—</b></div>
+          </div>
+
+          <div class="transfer-grid">
+            <div class="acct-card">
+              <div class="acct-card__title">付款账户</div>
+              <div class="acct-kv">
+                <div>银行名称：</div><div><b id="tPayerBank">—</b></div>
+                <div>户名：</div><div id="tPayerName">—</div>
+                <div>账号：</div><div id="tPayerNo">—</div>
+                <div>交易金额：</div><div><b id="tAmount">—</b></div>
+                <div>交易用途：</div><div id="tPurpose">代收款</div>
+              </div>
+            </div>
+
+            <div class="transfer-arrow" aria-hidden="true">▶</div>
+
+            <div class="acct-card">
+              <div class="acct-card__title">收款账户</div>
+              <div class="acct-kv">
+                <div>银行名称：</div><div><b id="tPayeeBank">—</b></div>
+                <div>户名：</div><div id="tPayeeName">—</div>
+                <div>账号：</div><div id="tPayeeNo">—</div>
+                <div>交易金额：</div><div><b id="tAmount2">—</b></div>
+                <div>交易用途：</div><div id="tPurpose2">代收款</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal__foot">
+            <button id="transferCancel" class="btn btn--ghost" type="button">取消</button>
+            <button id="transferConfirm" class="btn btn--primary" type="button">确认转账</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./assets/js/store.js"></script>
+    <script src="./assets/js/rules.js"></script>
+    <script src="./assets/js/app.js"></script>
+  </body>
+</html>

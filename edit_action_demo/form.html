@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活动创建/编辑</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="school-thumb"></div>
+        <strong>吴哥研学机构（市级）</strong>
+        <button class="plain-top-button" type="button">机构</button>
+      </div>
+      <nav class="topnav" aria-label="主导航">
+        <a class="active" href="#">研学</a>
+        <a href="#">课后服务</a>
+      </nav>
+      <div class="top-actions">
+        <span class="badge">99+</span>
+        <button class="top-icon" type="button" aria-label="消息">♧</button>
+        <button class="top-icon" type="button" aria-label="全屏">⛶</button>
+        <div class="avatar">杨</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <button class="nav-item" type="button"><span>⌂</span>数据看板</button>
+      <button class="nav-item" type="button"><span>◇</span>研学课程</button>
+      <button class="nav-item" type="button"><span>▧</span>托管活动管理</button>
+      <button class="nav-item" type="button"><span>◁</span>社会实践</button>
+      <button class="nav-item" type="button"><span>●</span>场地管理</button>
+      <button class="nav-item active" type="button"><span>⚑</span>集体研学活动</button>
+      <button class="nav-item" type="button"><span>▤</span>任务广场</button>
+      <button class="nav-item" type="button"><span>⌜</span>比选中心</button>
+      <button class="nav-item" type="button"><span>▣</span>出行管理</button>
+      <button class="nav-item" type="button"><span>▥</span>报表管理(研学)</button>
+      <button class="nav-item" type="button"><span>◴</span>订单管理（研学）</button>
+      <button class="nav-item" type="button"><span>Ⓡ</span>财务管理（研学）</button>
+      <button class="nav-item" type="button"><span>▤</span>托管活动结算</button>
+      <button class="nav-item" type="button"><span>●</span>集体研学活动结算</button>
+      <button class="nav-item" type="button"><span>⚙</span>系统设置</button>
+      <button class="collapse" type="button">≪</button>
+    </aside>
+
+    <main class="workspace form-workspace">
+      <div class="breadcrumb">⌂ / 集体研学活动 / <strong id="breadcrumbTitle">活动创建/编辑</strong></div>
+
+      <section class="form-card">
+        <div class="stepper" aria-label="创建步骤">
+          <div class="step active"><span>01</span> 基本信息</div>
+          <i></i>
+          <div class="step"><span>02</span> 选择设置</div>
+          <i></i>
+          <div class="step"><span>03</span> 备案材料</div>
+        </div>
+
+        <form class="activity-form">
+          <div class="form-column">
+            <label class="form-field upload-field required">
+              <span>活动封面</span>
+              <button class="upload-box" type="button">＋<br>上传</button>
+            </label>
+            <label class="form-field required">
+              <span>活动名称</span>
+              <input id="activityName" placeholder="请填写活动名称，最多30个汉字">
+            </label>
+            <label class="form-field required">
+              <span>价格（元）</span>
+              <input id="price" placeholder="请输入价格">
+            </label>
+            <label class="form-field required">
+              <span>使用区域</span>
+              <select>
+                <option>请选择</option>
+              </select>
+            </label>
+            <label class="form-field required">
+              <span>使用学校</span>
+              <select>
+                <option>请选择</option>
+              </select>
+            </label>
+            <label class="form-field required">
+              <span>选择年级</span>
+              <select id="gradeSelect">
+                <option>请选择</option>
+                <option value="一年级,二年级,三年级">一年级,二年级,三年级</option>
+                <option value="一年级,二年级">一年级,二年级</option>
+                <option value="四年级,五年级">四年级,五年级</option>
+                <option value="一年级,二年级,三年级,四年级">一年级,二年级,三年级,四年级</option>
+              </select>
+            </label>
+            <label class="form-field required">
+              <span>活动出行日期</span>
+              <div class="range-input">
+                <input placeholder="开始日期">
+                <em>→</em>
+                <input placeholder="结束日期">
+                <b>□</b>
+              </div>
+            </label>
+            <label class="form-field">
+              <span>报名起止时间</span>
+              <div class="range-input">
+                <input placeholder="开始日期">
+                <em>→</em>
+                <input placeholder="结束日期">
+                <b>□</b>
+              </div>
+            </label>
+            <label class="form-field upload-field">
+              <span>班级群码</span>
+              <button class="upload-box" type="button">＋<br>上传</button>
+            </label>
+            <label class="form-field required">
+              <span>主题类型</span>
+              <select>
+                <option>请选择</option>
+              </select>
+            </label>
+            <label class="form-field wide">
+              <span>活动目标</span>
+              <textarea placeholder="请输入活动目标"></textarea>
+            </label>
+          </div>
+
+          <div class="form-column right-column">
+            <fieldset class="check-group required">
+              <legend>出行人信息收集</legend>
+              <label><input type="checkbox" checked disabled> 姓名</label>
+              <label><input type="checkbox" checked disabled> 手机号</label>
+              <label><input type="checkbox"> 身份证号</label>
+              <label><input type="checkbox"> 监护人身份证号</label>
+            </fieldset>
+            <fieldset class="radio-group required">
+              <legend>报名类型</legend>
+              <label><input type="radio" name="signup" checked> 需要报名</label>
+              <label><input type="radio" name="signup"> 不需要报名</label>
+            </fieldset>
+            <fieldset class="radio-group required">
+              <legend>是否需要勋章</legend>
+              <label><input type="radio" name="medal" checked> 否</label>
+              <label><input type="radio" name="medal"> 是</label>
+            </fieldset>
+            <fieldset class="radio-group required">
+              <legend>是否需要证书</legend>
+              <label><input type="radio" name="certificate" checked> 否</label>
+              <label><input type="radio" name="certificate"> 是</label>
+            </fieldset>
+          </div>
+        </form>
+      </section>
+
+      <footer class="form-footer">
+        <a class="secondary-button" href="./index.html">返回</a>
+        <button class="primary-button" type="button">下一步</button>
+        <a class="primary-button" href="./index.html">保存到草稿</a>
+      </footer>
+    </main>
+  </div>
+
+  <div class="side-code">机构小程序码《</div>
+
+  <dialog class="notice-modal" id="editNotice">
+    <form class="notice-card" method="dialog">
+      <div class="notice-head">
+        <h2>提示</h2>
+        <button class="modal-close" value="cancel" type="submit" aria-label="关闭">×</button>
+      </div>
+      <p id="noticeMessage">修改后将影响已报名学生，请知悉。</p>
+      <div class="notice-actions">
+        <button class="primary-button" value="confirm" type="submit">我已知悉</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js?v=20260520"></script>
+</body>
+</html>
