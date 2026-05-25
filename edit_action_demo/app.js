@@ -171,7 +171,7 @@ function setupEditWarnings(mode) {
   priceInput.addEventListener("input", () => {
     if (!priceNoticeShown && priceInput.value.trim() !== originalPrice) {
       priceNoticeShown = true;
-      showEditNotice("修改价格后，已通过原价报名的学生，将会自动退款，请知悉");
+      showEditNotice("当前已有报名学生，请先完成已报名学生的退款，再修改价格");
     }
   });
 
@@ -180,7 +180,7 @@ function setupEditWarnings(mode) {
     const containsAllOriginalGrades = originalGrades.every((grade) => selectedGrades.includes(grade));
     if (!gradeNoticeShown && !containsAllOriginalGrades) {
       gradeNoticeShown = true;
-      showEditNotice("当前修改年级不再包含原年级，原年级已报名学生将会自动退款，请知悉。");
+      showEditNotice("当前已有报名学生，您修改的年级不包含原报名学生所在年级，请先完成已报名学生的退款，再修改适用年级。");
     }
   });
 }
