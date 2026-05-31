@@ -163,10 +163,16 @@ function setupEditWarnings(mode) {
 
   const priceInput = document.querySelector("#price");
   const gradeSelect = document.querySelector("#gradeSelect");
+  const medalRadios = document.querySelectorAll('input[name="medal"]');
+  const certificateRadios = document.querySelectorAll('input[name="certificate"]');
   const originalPrice = "0.01";
   const originalGrades = ["一年级", "二年级", "三年级"];
+  const originalMedal = "否";
+  const originalCertificate = "否";
   let priceNoticeShown = false;
   let gradeNoticeShown = false;
+  let medalNoticeShown = false;
+  let certificateNoticeShown = false;
 
   priceInput.addEventListener("input", () => {
     if (!priceNoticeShown && priceInput.value.trim() !== originalPrice) {
@@ -182,6 +188,26 @@ function setupEditWarnings(mode) {
       gradeNoticeShown = true;
       showEditNotice("当前已有报名学生，您修改的年级不包含原报名学生所在年级，请先完成已报名学生的退款，再修改适用年级。");
     }
+  });
+
+  medalRadios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      const selectedMedal = document.querySelector('input[name="medal"]:checked').nextSibling.textContent.trim();
+      if (!medalNoticeShown && selectedMedal !== originalMedal) {
+        medalNoticeShown = true;
+        showEditNotice("该活动已经有学生报名，请先将已报名学生进行退款，再进行内容修改。");
+      }
+    });
+  });
+
+  certificateRadios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      const selectedCertificate = document.querySelector('input[name="certificate"]:checked').nextSibling.textContent.trim();
+      if (!certificateNoticeShown && selectedCertificate !== originalCertificate) {
+        certificateNoticeShown = true;
+        showEditNotice("该活动已经有学生报名，请先将已报名学生进行退款，再进行内容修改。");
+      }
+    });
   });
 }
 
