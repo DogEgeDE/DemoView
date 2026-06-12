@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学校端三方比选原型</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f4f7fc;
+      color: #1f2d3d;
+      font-size: 14px;
+    }
+    .topbar {
+      height: 52px;
+      background: linear-gradient(90deg, #1f5eff 0%, #18b9e9 100%);
+      color: #fff;
+      display: grid;
+      grid-template-columns: 260px 1fr 130px;
+      align-items: center;
+      padding: 0 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+    .logo {
+      width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.22);
+      display: grid; place-items: center; font-weight: 700;
+    }
+    .org { border-left: 1px solid rgba(255,255,255,.45); padding-left: 12px; }
+    .top-tabs { justify-self: center; display: flex; gap: 42px; height: 52px; align-items: center; }
+    .top-tab { height: 52px; display: flex; align-items: center; position: relative; opacity: .9; }
+    .top-tab.active { font-weight: 700; opacity: 1; }
+    .top-tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 3px; height: 3px; background: #fff; border-radius: 3px; }
+    .top-actions { justify-self: end; display: flex; align-items: center; gap: 18px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: #1f6eff; display: grid; place-items: center; }
+    .layout { display: flex; min-height: calc(100vh - 52px); }
+    .sidebar { width: 170px; background: #fff; border-right: 1px solid #edf1f7; padding: 12px 8px; position: relative; }
+    .nav-item { height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 2px; color: #2b3440; margin-bottom: 4px; }
+    .nav-item.group { color: #1765ff; font-weight: 600; }
+    .nav-item.active { background: #eef3ff; color: #1765ff; font-weight: 600; }
+    .icon { width: 15px; text-align: center; color: currentColor; }
+    .collapse { position: absolute; bottom: 14px; left: 75px; color: #333; }
+    .content { flex: 1; padding: 14px 18px; overflow: hidden; position: relative; }
+    .breadcrumb { color: #8390a3; font-size: 13px; margin-bottom: 12px; }
+    .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 4px rgba(18,37,63,.04); min-height: calc(100vh - 86px); padding: 14px 16px; }
+    .tabs { display: flex; gap: 42px; border-bottom: 1px solid #edf1f7; height: 38px; }
+    .tab { color: #8a96a8; position: relative; font-weight: 600; }
+    .tab.active { color: #1765ff; }
+    .tab.active::after { content: ""; position: absolute; left: 12px; bottom: -12px; width: 28px; height: 3px; background: #1765ff; border-radius: 3px; }
+    .filters { display: flex; align-items: center; gap: 20px; padding: 24px 0 18px; border-bottom: 1px dashed #d7dde8; }
+    .field { display: flex; align-items: center; gap: 10px; color: #4b5a6b; }
+    select { width: 200px; height: 30px; border: 1px solid #dbe3ef; border-radius: 4px; padding: 0 12px; color: #8a96a8; background: #fff; }
+    .divider { height: 28px; width: 1px; background: #e1e6ef; margin-left: auto; }
+    .btn { height: 30px; border: 1px solid #dbe3ef; background: #fff; border-radius: 4px; padding: 0 16px; color: #394b5f; cursor: pointer; }
+    .btn.primary { background: #1765ff; border-color: #1765ff; color: #fff; }
+    .table-actions { display: flex; justify-content: flex-end; padding: 14px 0; }
+    .table-wrap { overflow-x: auto; max-height: 354px; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th { height: 42px; background: #f1f3f6; color: #202936; text-align: left; padding: 0 16px; font-weight: 600; }
+    td { height: 43px; border-bottom: 1px solid #edf1f7; padding: 0 16px; color: #1f2d3d; }
+    .green { color: #13b64b; font-weight: 600; }
+    .muted { color: #b7beca; }
+    .link { color: #1765ff; text-decoration: none; cursor: pointer; margin-right: 14px; }
+    .pager { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; color: #333; }
+    .page-no { background: #1765ff; color: #fff; border-radius: 4px; padding: 7px 10px; }
+    .float-tab { position: fixed; right: 0; top: 200px; color: #fff; writing-mode: vertical-rl; z-index: 5; }
+    .float-tab span { display: block; padding: 10px 8px; letter-spacing: 2px; }
+    .float-tab .parent { background: #1677ff; border-radius: 8px 0 0 0; }
+    .float-tab .teacher { background: #0fbf8f; border-radius: 0 0 0 8px; }
+    .mask { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: flex-start; justify-content: center; padding-top: 42px; z-index: 20; }
+    .mask.show { display: flex; }
+    .modal { background: #fff; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.24); overflow: hidden; }
+    .bid-modal { width: 704px; min-height: 264px; }
+    .detail-modal { width: 600px; }
+    .modal-header { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; font-weight: 700; border-bottom: 1px solid #edf1f7; }
+    .modal-icons { color: #8b96a8; display: flex; gap: 18px; font-size: 20px; font-weight: 400; }
+    .modal-body { padding: 14px 16px 18px; }
+    .bid-modal table th, .bid-modal table td { padding: 0 18px; }
+    .bid-modal table td { height: 44px; }
+    .detail-row { border-bottom: 1px solid #edf1f7; padding: 0 0 14px; margin-bottom: 14px; }
+    .detail-label { color: #344054; margin-bottom: 10px; }
+    .price { color: #ff4d4f; font-weight: 700; }
+    .attachments { display: grid; gap: 10px; }
+    .attachment-title { color: #344054; margin: 4px 0 0; }
+    .file-row { height: 30px; background: #f5f7fa; display: grid; grid-template-columns: 28px 1fr auto auto; align-items: center; gap: 10px; padding: 0 12px; }
+    .file-icon { width: 15px; height: 15px; border-radius: 3px; color: #fff; font-size: 10px; display: grid; place-items: center; }
+    .file-icon.orange { background: #ff8f3d; }
+    .file-icon.blue { background: #53a8ff; }
+    .file-icon.green { background: #43d08a; }
+    .file-name { color: #526173; overflow: hidden; text-overflow: ellipsis; }
+    .file-action { color: #1765ff; text-decoration: none; cursor: pointer; margin-left: 12px; }
+  </style>
+</head>
+<body>
+  <a class="prototype-switch" href="./index.html">机构端原型</a>
+  <header class="topbar">
+    <div class="brand"><div class="logo">◔</div><span>综合演示学校-小学</span><span class="org">学校⌄</span></div>
+    <nav class="top-tabs"><span class="top-tab active">研学</span><span class="top-tab">课后服务</span><span class="top-tab">劳动课</span></nav>
+    <div class="top-actions"><span>⌘</span><div class="avatar">杨</div></div>
+  </header>
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="nav-item"><span class="icon">⌂</span>数据看板</div>
+      <div class="nav-item group"><span class="icon">▣</span>精品研学课程库⌃</div>
+      <div class="nav-item"><span class="icon">▤</span>机构课程</div>
+      <div class="nav-item"><span class="icon">▤</span>基地课程</div>
+      <div class="nav-item"><span class="icon">▯</span>精品课程</div>
+      <div class="nav-item active"><span class="icon">⌜</span>三方比选</div>
+      <div class="nav-item"><span class="icon">▣</span>集体研学申报</div>
+      <div class="nav-item"><span class="icon">⚐</span>集体研学活动</div>
+      <div class="nav-item"><span class="icon">▤</span>任务广场</div>
+      <div class="nav-item"><span class="icon">⚑</span>活动管理⌄</div>
+      <div class="nav-item"><span class="icon">◉</span>勋章管理</div>
+      <div class="nav-item"><span class="icon">⌘</span>教学管理⌄</div>
+      <div class="nav-item"><span class="icon">☷</span>教务管理⌄</div>
+      <div class="collapse">≪</div>
+    </aside>
+    <section class="content">
+      <div class="breadcrumb">⌂ / 精品研学课程库 / <strong>三方比选</strong></div>
+      <div class="card">
+        <div class="tabs"><div class="tab active">预选课程</div><div class="tab">预选线路</div></div>
+        <div class="filters">
+          <div class="field"><span>选课方案</span><select><option>请选择</option></select></div>
+          <div class="divider"></div><button class="btn">⟳ 重置</button><button class="btn primary">⌕ 查询</button>
+        </div>
+        <div class="table-actions"><button class="btn primary">创建比选</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>序号</th><th>选课方案</th><th>选课状态</th><th>参选类型</th><th>已选课程</th><th>已选机构</th><th>投标机构</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>机构课独立发起</td><td><span class="green">已选</span></td><td>竞标</td><td>3</td><td>3</td><td>0</td><td><a class="link">修改</a><span class="muted">查看竞标</span></td></tr>
+              <tr><td>2</td><td>化学</td><td><span class="green">已选</span></td><td>竞标</td><td>1</td><td>3</td><td>0</td><td><a class="link">修改</a><span class="muted">查看竞标</span></td></tr>
+              <tr><td>3</td><td>比选课程4</td><td><span class="green">已选</span></td><td>竞标</td><td>1</td><td>3</td><td>1</td><td><a class="link view-bids">查看竞标</a></td></tr>
+              <tr><td>4</td><td>比选课程3</td><td><span class="green">已选</span></td><td>竞标</td><td>1</td><td>3</td><td>1</td><td><a class="link view-bids">查看竞标</a></td></tr>
+              <tr><td>5</td><td>222</td><td>未选</td><td>竞标</td><td>0</td><td>0</td><td>0</td><td><a class="link">开始选课</a><span class="muted">| 查看竞标</span></td></tr>
+              <tr><td>6</td><td>测试比选</td><td><span class="green">已选</span></td><td>竞标</td><td>1</td><td>1</td><td>1</td><td><a class="link view-bids">查看竞标</a></td></tr>
+              <tr><td>7</td><td>张家口预选活动演示</td><td><span class="green">已选</span></td><td>竞标</td><td>1</td><td>1</td><td>1</td><td><a class="link view-bids">查看竞标</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pager"><span>共 9 条数据</span><span class="page-no">1</span><button class="btn">10 条/页⌄</button></div>
+      </div>
+    </section>
+  </main>
+  <div class="float-tab"><span class="parent">家长小程序码≪</span><span class="teacher">教师小程序码≪</span></div>
+
+  <div class="mask" id="bidMask">
+    <div class="modal bid-modal">
+      <div class="modal-header"><span>机构投标清单</span><div class="modal-icons"><span>⌖</span><span class="close-bids">×</span></div></div>
+      <div class="modal-body">
+        <table>
+          <thead><tr><th>序号</th><th>机构名称</th><th>投标状态</th><th>确认状态</th><th>理由</th><th>操作</th></tr></thead>
+          <tbody><tr><td>1</td><td>综合演示机构</td><td><span class="green">已投标</span></td><td><span class="green">已中标</span></td><td>--</td><td><a class="link view-plan">查看方案</a></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="mask" id="detailMask">
+    <div class="modal detail-modal">
+      <div class="modal-header"><span>方案详情</span><div class="modal-icons"><span>⌖</span><span class="close-detail">×</span></div></div>
+      <div class="modal-body">
+        <div class="detail-row"><div class="detail-label">方案报价</div><div class="price">1元/人</div></div>
+        <div class="detail-row"><div class="detail-label">费用说明</div><div>111</div></div>
+        <div class="detail-row"><div class="detail-label">方案说明</div><div>&nbsp;</div></div>
+        <div>
+          <div class="detail-label">附件</div>
+          <div class="attachments">
+            <div class="attachment-title">1.课程设计方案</div>
+            <div class="file-row"><span class="file-icon orange">PDF</span><span class="file-name">四川省普通高中学生综合素质评价实施办法.pdf</span><a class="file-action">预览</a><a class="file-action">下载</a></div>
+            <div class="attachment-title">2.安全措施文件</div>
+            <div class="file-row"><span class="file-icon blue">DOC</span><span class="file-name">师德师风承诺书.doc</span><a class="file-action">预览</a><a class="file-action">下载</a></div>
+            <div class="attachment-title">3.分项报价表</div>
+            <div class="file-row"><span class="file-icon green">XLS</span><span class="file-name">批量导入学生模板 (1).xlsx</span><a class="file-action">预览</a><a class="file-action">下载</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bidMask = document.getElementById('bidMask');
+    const detailMask = document.getElementById('detailMask');
+    document.querySelectorAll('.view-bids').forEach(item => item.addEventListener('click', () => bidMask.classList.add('show')));
+    document.querySelector('.view-plan').addEventListener('click', () => detailMask.classList.add('show'));
+    document.querySelector('.close-bids').addEventListener('click', () => bidMask.classList.remove('show'));
+    document.querySelector('.close-detail').addEventListener('click', () => detailMask.classList.remove('show'));
+    [bidMask, detailMask].forEach(mask => {
+      mask.addEventListener('click', event => {
+        if (event.target === mask) mask.classList.remove('show');
+      });
+    });
+  </script>
+</body>
+</html>
