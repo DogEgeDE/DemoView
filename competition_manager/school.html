@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学校 - 赛事管理系统</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="web-prototype">
+  <div class="switch-panel">
+    <div class="trigger">👤</div>
+    <div class="menu">
+      <button onclick="window.location.href='center-base.html'"><span class="icon">🏠</span>中心基地</button>
+      <button onclick="window.location.href='education-bureau.html'"><span class="icon">🏢</span>教育局</button>
+      <button onclick="window.location.href='school.html'" class="active"><span class="icon">🏫</span>学校</button>
+      <button onclick="window.location.href='organization.html'"><span class="icon">🏭</span>机构</button>
+      <button onclick="window.location.href='student.html'"><span class="icon">👨‍🎓</span>学生端</button>
+    </div>
+  </div>
+
+  <div class="app-wrapper">
+    <div class="top-bar">
+      <div class="left-section">
+        <div class="title">隆昌市研学实践教育管理平台</div>
+      </div>
+      <div class="center-section">
+        <div class="tab active">赛事管理</div>
+      </div>
+      <div class="right-section">
+        <select class="user-select">
+          <option>隆昌一小管理员</option>
+        </select>
+        <div class="avatar">校</div>
+      </div>
+    </div>
+
+    <div class="main-body">
+      <div class="sidebar">
+        <div class="menu" id="menu"></div>
+      </div>
+
+      <div class="main-content">
+        <div class="content-area" id="content-area"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    currentClient = 'school';
+    currentPage = 'event-list';
+    window.onload = function() {
+      renderSidebar();
+      renderContent();
+    };
+  </script>
+</body>
+</html>

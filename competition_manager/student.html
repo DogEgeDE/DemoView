@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>学生端 - 赛事管理系统</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="switch-panel">
+    <div class="trigger">👤</div>
+    <div class="menu">
+      <button onclick="window.location.href='center-base.html'"><span class="icon">🏠</span>中心基地</button>
+      <button onclick="window.location.href='education-bureau.html'"><span class="icon">🏢</span>教育局</button>
+      <button onclick="window.location.href='school.html'"><span class="icon">🏫</span>学校</button>
+      <button onclick="window.location.href='organization.html'"><span class="icon">🏭</span>机构</button>
+      <button onclick="window.location.href='student.html'" class="active"><span class="icon">👨‍🎓</span>学生端</button>
+    </div>
+  </div>
+
+  <div class="student-app active">
+    <div class="student-header">
+      <div class="back-btn" onclick="goBack()">←</div>
+      <div class="title">活动</div>
+      <div class="avatar">张</div>
+    </div>
+
+    <div class="student-content" id="student-content">
+      <div class="diamond-nav">
+        <div class="diamond-item" onclick="switchDiamondNav('collective')">
+          <div class="diamond-icon">🏫</div>
+          <div class="diamond-label">集体研学</div>
+        </div>
+        <div class="diamond-item" onclick="switchDiamondNav('practice')">
+          <div class="diamond-icon">🔬</div>
+          <div class="diamond-label">综合实践</div>
+        </div>
+        <div class="diamond-item" onclick="switchDiamondNav('vacation')">
+          <div class="diamond-icon">🏖️</div>
+          <div class="diamond-label">假期托管</div>
+        </div>
+        <div class="diamond-item active" onclick="switchDiamondNav('competition')">
+          <div class="diamond-icon">🏆</div>
+          <div class="diamond-label">评选赛事</div>
+        </div>
+      </div>
+      <div id="diamond-content"></div>
+    </div>
+
+    <div class="student-tab-bar">
+      <div class="student-tab-item active" onclick="switchStudentTab('activity')">
+        <span class="icon">🎯</span>
+        <span>活动</span>
+      </div>
+      <div class="student-tab-item" onclick="switchStudentTab('learn')">
+        <span class="icon">📚</span>
+        <span>学习</span>
+      </div>
+      <div class="student-tab-item" onclick="switchStudentTab('works')">
+        <span class="icon">🎨</span>
+        <span>作品</span>
+      </div>
+      <div class="student-tab-item" onclick="switchStudentTab('messages')">
+        <span class="icon">💬</span>
+        <span>消息</span>
+      </div>
+      <div class="student-tab-item" onclick="switchStudentTab('profile')">
+        <span class="icon">👤</span>
+        <span>我的</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var currentDiamondNav = 'competition';
+    var currentStudentTab = 'activity';
+    var currentPage = 'activity';
+    var currentEventId = 1;
+    var signedEventIds = [3];
+    var uploadedEventIds = [3];
+
+    var studentBusinessRules = {
+      'activity': {title: '赛事活动规则', rules: [
+        {tag: '金刚区导航', title: '导航规则', content: '点击不同导航项切换活动类型，选中状态为淡蓝色圆形。'},
+        {tag: '卡片操作', title: '卡片规则', content: '点击卡片进入赛事详情，点击"立即报名"按钮直接进入报名页面。'},
+        {tag: '状态限制', title: '报名限制', content: '已结束的赛事不可报名；已报名的赛事显示"已报名"状态。'}
+      ]},
+      'event-detail': {title: '赛事详情规则', rules: [
+        {tag: '赛事操作', title: '操作规则', content: '赛事报名：未报名时可点击报名；上传作品：仅已报名用户可上传；查看排名：所有用户均可查看；结果公示：所有用户均可查看。'},
+        {tag: '我的排名', title: '排名规则', content: '报名后显示排名入口，上传作品并完成评审后显示具体排名和分数。'},
+        {tag: '时间轴', title: '流程规则', content: '赛事流程按时间轴展示，包括报名、投稿、评审、公示四个阶段。'}
+      ]},
+      'signup': {title: '赛事报名规则', rules: [
+        {tag: '信息填写', title: '填写规则', content: '学生姓名、学校、年级班级、联系电话为必填项；年级班级使用联动选择器选择。'},
+        {tag: '报名说明', title: '说明规则', content: '可填写特长、参赛经历等补充信息，帮助评委了解学生情况。'},
+        {tag: '提交限制', title: '提交规则', content: '每个赛事仅可报名一次，提交后不可修改报名信息。'}
+      ]},
+      'upload': {title: '上传作品规则', rules: [
+        {tag: '上传前提', title: '前提规则', content: '必须先报名该赛事，方可上传作品。'},
+        {tag: '作品要求', title: '格式规则', content: '支持图片、视频、文档等多种格式，单个文件大小不超过50MB。'},
+        {tag: '提交限制', title: '提交规则', content: '每个赛事仅可上传一个作品，提交后不可修改。'}
+      ]},
+      'ranking': {title: '赛事排名规则', rules: [
+        {tag: '排名展示', title: '展示规则', content: '按总得分降序排列，第一名用金色标识，其他排名按顺序展示。'},
+        {tag: '我的排名', title: '我的排名', content: '如果已报名并上传作品，会高亮显示自己的排名位置。'}
+      ]},
+      'result': {title: '结果公示规则', rules: [
+        {tag: '公示内容', title: '内容规则', content: '公示获奖名单、获奖等级、获奖作品等信息。'},
+        {tag: '公示时间', title: '时间规则', content: '公示期为7天，期间可对结果进行申诉。'}
+      ]}
+    };
+
+    function renderStudentRulePanel(page) {
+      var rules = studentBusinessRules[page];
+      if (!rules) return '';
+      var ruleHtml = rules.rules.map(function(rule) {
+        return '<div class="rule-item">' +
+          '<div class="rule-tag">' + rule.tag + '</div>' +
+          '<div class="rule-item-title">' + rule.title + '</div>' +
+          '<div class="rule-item-content">' + rule.content + '</div>' +
+          '</div>';
+      }).join('');
+      return '<div class="student-rule-modal" id="studentRuleModal" style="display:none;">' +
+        '<div class="student-rule-mask" onclick="hideStudentRules()"></div>' +
+        '<div class="student-rule-content">' +
+        '<div class="student-rule-header">' +
+        '<span style="font-size:16px;font-weight:600;">📋 ' + rules.title + '</span>' +
+        '<span class="student-rule-close" onclick="hideStudentRules()">×</span>' +
+        '</div>' +
+        '<div class="student-rule-body">' + ruleHtml + '</div>' +
+        '</div></div>';
+    }
+
+    function showStudentRules(page) {
+      var modal = document.getElementById('studentRuleModal');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', renderStudentRulePanel(page));
+      } else {
+        modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+      }
+    }
+
+    function hideStudentRules() {
+      var modal = document.getElementById('studentRuleModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    var events = [
+      {
+        id: 1,
+        title: '赛事比赛活动（乒乓球活动）',
+        statusText: '投稿中',
+        statusClass: 'status-submitting',
+        time: '2026-05-01 至 2026-07-31',
+        signupTime: '2026-05-01 至 2026-06-30',
+        submitTime: '2026-06-01 至 2026-07-15',
+        reviewTime: '2026-07-16 至 2026-07-31',
+        cover: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=table%20tennis%20competition%20sports%20event&image_size=landscape_16_9',
+        desc: '面向全市中小学生开展乒乓球技能展示与运动风采评选，学生可报名后上传参赛视频作品。',
+        rule: '参赛作品需为本人真实参与的乒乓球训练或比赛视频，内容积极健康，视频时长建议控制在3分钟以内。评委将从动作规范、运动表现、作品完整度和精神风貌等维度进行综合评分。',
+        signed: false,
+        uploaded: false,
+        result: false
+      },
+      {
+        id: 2,
+        title: '校园科技节创意大赛',
+        statusText: '未开始',
+        statusClass: 'status-ended',
+        time: '2026-06-15 至 2026-08-30',
+        signupTime: '2026-06-15 至 2026-07-15',
+        submitTime: '2026-07-01 至 2026-08-15',
+        reviewTime: '2026-08-16 至 2026-08-30',
+        cover: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=science%20technology%20innovation%20festival&image_size=landscape_16_9',
+        desc: '围绕科技创新、创意实践、模型制作等主题开展作品征集与展示评选。',
+        rule: '参赛作品需围绕科技创新主题，可提交模型、实验记录、演示视频或图文说明。作品应为原创，需清晰说明设计思路、制作过程和实践价值。',
+        signed: false,
+        uploaded: false,
+        result: false
+      },
+      {
+        id: 3,
+        title: '书法绘画比赛',
+        statusText: '已结束',
+        statusClass: 'status-approved',
+        time: '2026-04-01 至 2026-06-15',
+        signupTime: '2026-04-01 至 2026-04-30',
+        submitTime: '2026-04-15 至 2026-05-31',
+        reviewTime: '2026-06-01 至 2026-06-15',
+        cover: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20calligraphy%20painting%20art%20competition&image_size=landscape_16_9',
+        desc: '展示学生书法与绘画艺术素养，评选优秀作品并进行结果公示。',
+        rule: '作品需为学生本人原创，书法和绘画作品均可参赛。上传作品图片需清晰完整，不得使用他人作品或网络素材冒名参赛。',
+        signed: true,
+        uploaded: true,
+        result: true
+      }
+    ];
+
+    function getEvent(id) {
+      return events.find(function(item) { return item.id === id; }) || events[0];
+    }
+
+    function setHeader(title, showBack) {
+      document.querySelector('.student-header .title').textContent = title;
+      document.querySelector('.student-header .back-btn').style.display = showBack ? 'flex' : 'none';
+    }
+
+    function goBack() {
+      var detailPages = ['signup', 'upload', 'ranking', 'result'];
+      if (detailPages.indexOf(currentPage) > -1) {
+        openEventDetail(currentEventId);
+        return;
+      }
+      if (currentPage !== 'activity') {
+        renderStudentContent('activity');
+        return;
+      }
+      console.log('返回上一页');
+    }
+
+    function switchDiamondNav(nav) {
+      currentDiamondNav = nav;
+      document.querySelectorAll('.diamond-item').forEach(function(item) {
+        item.classList.remove('active');
+      });
+      event.target.closest('.diamond-item').classList.add('active');
+      renderDiamondContent();
+    }
+
+    function renderDiamondContent() {
+      var content = document.getElementById('diamond-content');
+      if (currentDiamondNav === 'competition') {
+        content.innerHTML = '<div class="event-card-list">' + events.map(renderEventCard).join('') + '</div>' +
+          '<div class="student-rule-btn" onclick="showStudentRules(\'activity\')">📋</div>';
+      } else if (currentDiamondNav === 'collective') {
+        content.innerHTML = '<div class="student-empty">🏫 暂无集体研学活动</div>';
+      } else if (currentDiamondNav === 'practice') {
+        content.innerHTML = '<div class="student-empty">🔬 暂无综合实践活动</div>';
+      } else if (currentDiamondNav === 'vacation') {
+        content.innerHTML = '<div class="student-empty">🏖️ 暂无假期托管活动</div>';
+      }
+    }
+
+    function renderEventCard(item) {
+      var isSigned = signedEventIds.indexOf(item.id) > -1;
+      var isDisabled = item.statusText === '已结束' || isSigned;
+      var btnText = item.statusText === '已结束' ? '已结束' : (isSigned ? '已报名' : '立即报名');
+      var btnClass = isDisabled ? 'btn-secondary' : 'btn-primary';
+      return '<div class="event-card" onclick="openEventDetail(' + item.id + ')">' +
+        '<img src="' + item.cover + '" class="event-cover-image" alt="赛事封面">' +
+        '<div class="event-card-info">' +
+        '<div class="event-card-title">' + item.title + '</div>' +
+        '<div class="event-card-status"><span class="status-tag ' + item.statusClass + '">' + item.statusText + '</span></div>' +
+        '<div class="event-card-time">📅 ' + item.time + '</div>' +
+        '<button class="btn ' + btnClass + ' event-card-btn"' + (isDisabled ? ' disabled' : '') + ' onclick="openSignup(' + item.id + ');event.stopPropagation();">' + btnText + '</button>' +
+        '</div></div>';
+    }
+
+    function openEventDetail(id) {
+      currentPage = 'event-detail';
+      currentEventId = id || currentEventId;
+      var item = getEvent(currentEventId);
+      setHeader('赛事详情', true);
+      document.getElementById('student-content').innerHTML = '<div class="student-detail-page">' +
+        '<img class="detail-cover" src="' + item.cover + '" alt="赛事封面">' +
+        '<div class="student-section">' +
+        '<div class="detail-title-row"><div class="detail-title">' + item.title + '</div><span class="status-tag ' + item.statusClass + '">' + item.statusText + '</span></div>' +
+        '<div class="detail-info-list">' +
+        '<div>报名时间：' + item.signupTime + '</div>' +
+        '<div>投稿时间：' + item.submitTime + '</div>' +
+        '<div>评审时间：' + item.reviewTime + '</div>' +
+        '</div></div>' +
+        '<div class="student-section"><div class="section-title">赛事操作</div>' + renderEventActions(item) + '</div>' +
+        '<div class="student-section"><div class="section-title">赛事简介</div><div class="detail-desc">' + item.desc + '</div></div>' +
+        '<div class="student-section"><div class="section-title">赛事规则</div><div class="detail-rule">' + item.rule + '</div></div>' +
+        '<div class="student-section"><div class="section-title">我的排名</div>' + renderMyRanking(item) + '</div>' +
+        '<div class="student-section"><div class="section-title">赛事流程</div>' + renderEventTimeline(item) + '</div>' +
+        '</div>' +
+        '<div class="student-rule-btn" onclick="showStudentRules(\'event-detail\')">📋</div>';
+    }
+
+    function renderMyRanking(item) {
+      var isSigned = signedEventIds.indexOf(item.id) > -1;
+      var isUploaded = uploadedEventIds.indexOf(item.id) > -1;
+      if (!isSigned) {
+        return '<div class="my-rank-empty">报名后可查看自己的参赛排名。</div>';
+      }
+      if (!isUploaded) {
+        return '<div class="my-rank-empty">上传作品后，评审完成即可查看排名。</div>';
+      }
+      return '<div class="my-rank-card" onclick="openRanking(' + item.id + ')">' +
+        '<div class="my-rank-main"><span>第 3 名</span><b>92.5 分</b></div>' +
+        '<div class="my-rank-meta">作品：我的乒乓球之旅 · 超过 78% 参赛作品</div>' +
+        '<div class="my-rank-link">查看完整排名 ›</div>' +
+        '</div>';
+    }
+
+    function renderEventActions(item) {
+      var isSigned = signedEventIds.indexOf(item.id) > -1;
+      var isUploaded = uploadedEventIds.indexOf(item.id) > -1;
+      var signupDisabled = item.statusText === '已结束' || isSigned;
+      return '<div class="event-action-grid">' +
+        '<button class="event-action-btn primary" onclick="openSignup(' + item.id + ')" ' + (signupDisabled ? 'disabled' : '') + '><span class="action-icon">✍️</span><span>' + (isSigned ? '已报名' : '赛事报名') + '</span></button>' +
+        '<button class="event-action-btn" onclick="openUploadWork(' + item.id + ')" ' + (!isSigned ? 'disabled' : '') + '><span class="action-icon">📤</span><span>' + (isUploaded ? '查看作品' : '上传作品') + '</span></button>' +
+        '<button class="event-action-btn" onclick="openRanking(' + item.id + ')"><span class="action-icon">🏅</span><span>查看排名</span></button>' +
+        '<button class="event-action-btn" onclick="openResultNotice(' + item.id + ')"><span class="action-icon">📢</span><span>结果公示</span></button>' +
+        '</div>';
+    }
+
+    function renderEventTimeline(item) {
+      return '<div class="event-timeline">' +
+        '<div class="timeline-item done"><div class="timeline-dot">1</div><div class="timeline-content"><div class="timeline-title">报名阶段</div><div class="timeline-time">' + item.signupTime + '</div><div class="timeline-desc">学生提交报名信息，确认参赛资格。</div></div></div>' +
+        '<div class="timeline-item done"><div class="timeline-dot">2</div><div class="timeline-content"><div class="timeline-title">作品投稿</div><div class="timeline-time">' + item.submitTime + '</div><div class="timeline-desc">报名成功后上传参赛作品和作品说明。</div></div></div>' +
+        '<div class="timeline-item current"><div class="timeline-dot">3</div><div class="timeline-content"><div class="timeline-title">评审打分</div><div class="timeline-time">' + item.reviewTime + '</div><div class="timeline-desc">专家评委根据评选规则进行评分。</div></div></div>' +
+        '<div class="timeline-item"><div class="timeline-dot">4</div><div class="timeline-content"><div class="timeline-title">结果公示</div><div class="timeline-time">评审完成后</div><div class="timeline-desc">公示赛事排名与评选结果。</div></div></div>' +
+        '</div>';
+    }
+
+    var gradeClasses = {
+      '一年级': ['(1)班', '(2)班', '(3)班', '(4)班'],
+      '二年级': ['(1)班', '(2)班', '(3)班', '(4)班'],
+      '三年级': ['(1)班', '(2)班', '(3)班', '(4)班'],
+      '四年级': ['(1)班', '(2)班', '(3)班', '(4)班'],
+      '五年级': ['(1)班', '(2)班', '(3)班', '(4)班'],
+      '六年级': ['(1)班', '(2)班', '(3)班', '(4)班']
+    };
+    var selectedGrade = '六年级';
+    var selectedClass = '(1)班';
+
+    function openSignup(id) {
+      var item = getEvent(id);
+      if (item.statusText === '已结束') return;
+      currentPage = 'signup';
+      currentEventId = id;
+      selectedGrade = '六年级';
+      selectedClass = '(1)班';
+      setHeader('赛事报名', true);
+      document.getElementById('student-content').innerHTML = '<div class="student-section">' +
+        '<div class="section-title">' + item.title + '</div>' +
+        '<div class="student-form-item"><label>学生姓名</label><input value="张三"></div>' +
+        '<div class="student-form-item"><label>学校</label><input placeholder="请输入学校名称" value="隆昌一小"></div>' +
+        '<div class="student-form-item"><label>年级班级</label><div class="picker-trigger" onclick="showGradeClassPicker()">' +
+        '<span class="picker-value">' + selectedGrade + ' · ' + selectedClass + '</span><span class="picker-arrow">›</span></div></div>' +
+        '<div class="student-form-item"><label>联系电话</label><input placeholder="请输入联系电话" value="13800000000"></div>' +
+        '<div class="student-form-item"><label>报名说明</label><textarea placeholder="可填写特长、参赛经历等"></textarea></div>' +
+        '<button class="btn btn-primary student-submit-btn" onclick="submitSignup()">提交报名</button>' +
+        '</div>' +
+        '<div class="picker-modal" id="gradeClassPicker" style="display:none;" onclick="hideGradeClassPicker()">' +
+        '<div class="picker-content" onclick="event.stopPropagation()">' +
+        '<div class="picker-header"><span class="picker-cancel" onclick="hideGradeClassPicker()">取消</span><span class="picker-title">选择年级班级</span><span class="picker-confirm" onclick="confirmGradeClassPicker()">确定</span></div>' +
+        '<div class="picker-body">' +
+        '<div class="picker-column"><div class="picker-scroll">' + Object.keys(gradeClasses).map(function(g) { return '<div class="picker-item' + (g === selectedGrade ? ' active' : '') + '" onclick="selectGrade(\'' + g + '\')">' + g + '</div>'; }).join('') + '</div></div>' +
+        '<div class="picker-column"><div class="picker-scroll" id="classList">' + gradeClasses['六年级'].map(function(c) { return '<div class="picker-item' + (c === selectedClass ? ' active' : '') + '" onclick="selectClass(\'' + c + '\')">' + c + '</div>'; }).join('') + '</div></div>' +
+        '</div></div></div>' +
+        '<div class="student-rule-btn" onclick="showStudentRules(\'signup\')">📋</div>';
+    }
+
+    function showGradeClassPicker() {
+      document.getElementById('gradeClassPicker').style.display = 'block';
+    }
+
+    function hideGradeClassPicker() {
+      document.getElementById('gradeClassPicker').style.display = 'none';
+    }
+
+    function selectGrade(grade) {
+      selectedGrade = grade;
+      selectedClass = gradeClasses[grade][0];
+      document.querySelectorAll('#gradeClassPicker .picker-column:first-child .picker-item').forEach(function(item) {
+        item.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      var classScroll = document.getElementById('classList');
+      classScroll.innerHTML = gradeClasses[grade].map(function(c) { return '<div class="picker-item' + (c === selectedClass ? ' active' : '') + '" onclick="selectClass(\'' + c + '\')">' + c + '</div>'; }).join('');
+    }
+
+    function selectClass(cls) {
+      selectedClass = cls;
+      document.querySelectorAll('#gradeClassPicker .picker-column:last-child .picker-item').forEach(function(item) {
+        item.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    function confirmGradeClassPicker() {
+      document.querySelector('.picker-trigger .picker-value').textContent = selectedGrade + ' · ' + selectedClass;
+      hideGradeClassPicker();
+    }
+
+    function submitSignup() {
+      if (signedEventIds.indexOf(currentEventId) === -1) signedEventIds.push(currentEventId);
+      showStudentToast('报名成功');
+      openEventDetail(currentEventId);
+    }
+
+    function openUploadWork(id) {
+      if (signedEventIds.indexOf(id) === -1) return;
+      currentPage = 'upload';
+      currentEventId = id;
+      var uploaded = uploadedEventIds.indexOf(id) > -1;
+      setHeader(uploaded ? '我的作品' : '上传作品', true);
+      document.getElementById('student-content').innerHTML = '<div class="student-section">' +
+        '<div class="section-title">' + getEvent(id).title + '</div>' +
+        '<div class="student-form-item"><label>作品名称</label><input value="' + (uploaded ? '我的乒乓球之旅' : '') + '" placeholder="请输入作品名称"></div>' +
+        '<div class="student-form-item"><label>作品说明</label><textarea placeholder="请输入作品简介">' + (uploaded ? '展示发球、接球和比赛技巧训练成果。' : '') + '</textarea></div>' +
+        '<div class="student-upload-box">+ 选择图片/视频文件</div>' +
+        '<button class="btn btn-primary student-submit-btn" onclick="submitWork()">' + (uploaded ? '更新作品' : '提交作品') + '</button>' +
+        '</div>' +
+        '<div class="student-rule-btn" onclick="showStudentRules(\'upload\')">📋</div>';
+    }
+
+    function submitWork() {
+      if (uploadedEventIds.indexOf(currentEventId) === -1) uploadedEventIds.push(currentEventId);
+      showStudentToast('作品提交成功');
+      openEventDetail(currentEventId);
+    }
+
+    function openRanking(id) {
+      currentPage = 'ranking';
+      currentEventId = id;
+      setHeader('赛事排名', true);
+      document.getElementById('student-content').innerHTML = '<div class="student-section">' +
+        '<div class="section-title">' + getEvent(id).title + '</div>' +
+        '<div class="ranking-list">' +
+        '<div class="ranking-item top"><span>1</span><div><b>李明</b><p>隆昌一小 · 96.5分</p></div></div>' +
+        '<div class="ranking-item top"><span>2</span><div><b>王芳</b><p>隆昌二小 · 94.0分</p></div></div>' +
+        '<div class="ranking-item top"><span>3</span><div><b>张三</b><p>隆昌一小 · 92.5分</p></div></div>' +
+        '<div class="ranking-item"><span>4</span><div><b>陈晨</b><p>隆昌实验小学 · 90.0分</p></div></div>' +
+        '</div></div>' +
+        '<div class="student-rule-btn" onclick="showStudentRules(\'ranking\')">📋</div>';
+    }
+
+    function openResultNotice(id) {
+      currentPage = 'result';
+      currentEventId = id;
+      var item = getEvent(id);
+      setHeader('结果公示', true);
+      document.getElementById('student-content').innerHTML = '<div class="student-section result-notice">' +
+        '<div class="section-title">' + item.title + '</div>' +
+        '<div class="notice-meta">公示时间：2026-06-16 至 2026-06-23</div>' +
+        '<div class="result-card"><b>一等奖</b><p>李明《运动少年》 · 96.5分</p></div>' +
+        '<div class="result-card"><b>二等奖</b><p>王芳《创意发球展示》 · 94.0分</p></div>' +
+        '<div class="result-card my"><b>三等奖</b><p>张三《我的乒乓球之旅》 · 92.5分</p></div>' +
+        '<div class="notice-tip">如对公示结果有异议，请在公示期内联系学校管理员。</div>' +
+        '</div>' +
+        '<div class="student-rule-btn" onclick="showStudentRules(\'result\')">📋</div>';
+    }
+
+    function showStudentToast(text) {
+      var toast = document.createElement('div');
+      toast.className = 'student-toast';
+      toast.textContent = text;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 1200);
+    }
+
+    function updateStudentTabActive(tab) {
+      var tabs = ['activity', 'learn', 'works', 'messages', 'profile'];
+      document.querySelectorAll('.student-tab-item').forEach(function(item, index) {
+        item.classList.toggle('active', tabs[index] === tab);
+      });
+    }
+
+    function switchStudentTab(tab) {
+      currentStudentTab = tab;
+      updateStudentTabActive(tab);
+      renderStudentContent(tab);
+    }
+
+    function renderStudentContent(tab) {
+      var content = document.getElementById('student-content');
+      currentStudentTab = tab;
+      currentPage = tab;
+      updateStudentTabActive(tab);
+      if (tab === 'activity') {
+        setHeader('活动', true);
+        content.innerHTML = '<div class="diamond-nav">' +
+          '<div class="diamond-item" onclick="switchDiamondNav(\'collective\')"><div class="diamond-icon">🏫</div><div class="diamond-label">集体研学</div></div>' +
+          '<div class="diamond-item" onclick="switchDiamondNav(\'practice\')"><div class="diamond-icon">🔬</div><div class="diamond-label">综合实践</div></div>' +
+          '<div class="diamond-item" onclick="switchDiamondNav(\'vacation\')"><div class="diamond-icon">🏖️</div><div class="diamond-label">假期托管</div></div>' +
+          '<div class="diamond-item active" onclick="switchDiamondNav(\'competition\')"><div class="diamond-icon">🏆</div><div class="diamond-label">评选赛事</div></div>' +
+          '</div><div id="diamond-content"></div>';
+        currentDiamondNav = 'competition';
+        renderDiamondContent();
+      } else if (tab === 'learn') {
+        setHeader('学习', true);
+        content.innerHTML = '<div class="student-card"><div class="card-header"><div class="card-title">我的学习任务</div><span class="status-tag status-reviewing status">进行中</span></div>' +
+          '<div class="info">📚 研学实践课程 · 第3周</div><div class="desc">本周学习目标：了解乒乓球运动发展历史，完成课后小测验。</div>' +
+          '<div class="actions"><button class="btn btn-primary">继续学习</button></div></div>';
+      } else if (tab === 'works') {
+        setHeader('作品', true);
+        content.innerHTML = '<div class="student-card"><div class="card-header"><div class="card-title">我的乒乓球之旅</div><span class="status-tag status-approved status">已提交</span></div>' +
+          '<div class="info">📅 赛事：赛事比赛活动（乒乓球活动）</div><div class="info">📅 提交时间：2026-06-15</div>' +
+          '<div class="desc">一段3分钟的乒乓球训练视频，包括发球、接球和比赛技巧展示。</div>' +
+          '<div class="actions"><button class="btn btn-secondary" onclick="openUploadWork(1)">编辑</button><button class="btn btn-primary" onclick="openEventDetail(1)">查看赛事</button></div></div>';
+      } else if (tab === 'messages') {
+        setHeader('消息', true);
+        content.innerHTML = '<div class="student-card" onclick="openEventDetail(1)"><div class="card-header"><div class="card-title">系统通知</div></div>' +
+          '<div class="info">赛事比赛活动（乒乓球活动）已进入评选阶段</div><div class="assign-meta">2026-07-16 10:30</div></div>' +
+          '<div class="student-card" onclick="openResultNotice(3)"><div class="card-header"><div class="card-title">评审结果</div></div>' +
+          '<div class="info">书法绘画比赛获奖公示已发布</div><div class="assign-meta">2026-06-23 09:00</div></div>';
+      } else if (tab === 'profile') {
+        setHeader('我的', false);
+        content.innerHTML = '<div style="text-align:center;padding:48rpx 0;border-bottom:1px solid #f0f0f0;margin-bottom:24rpx;">' +
+          '<div style="width:120rpx;height:120rpx;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:48rpx;margin:0 auto 24rpx;">张</div>' +
+          '<div style="font-weight:600;font-size:32rpx;">张三</div><div class="assign-meta">隆昌一小 · 六年级(1)班</div></div>' +
+          '<div class="student-card" style="border:none;padding:24rpx 0;"><div class="info" onclick="openEventDetail(1)" style="display:flex;align-items:center;gap:24rpx;padding:24rpx 0;border-bottom:1px solid #f0f0f0;">📋 我的报名</div>' +
+          '<div class="info" onclick="openEventDetail(1)" style="display:flex;align-items:center;gap:24rpx;padding:24rpx 0;border-bottom:1px solid #f0f0f0;">🏆 我的赛事</div>' +
+          '<div class="info" onclick="openRanking(1)" style="display:flex;align-items:center;gap:24rpx;padding:24rpx 0;border-bottom:1px solid #f0f0f0;">📊 我的排名</div>' +
+          '<div class="info" style="display:flex;align-items:center;gap:24rpx;padding:24rpx 0;">⚙️ 设置</div></div>';
+      }
+    }
+
+    window.onload = function() {
+      renderDiamondContent();
+    };
+  </script>
+</body>
+</html>
