@@ -112,8 +112,39 @@ var businessRules = {
   }
 };
 
+var educationBureauBusinessRules = {
+  'event-list': {
+    title: '教育局端赛事列表 - 业务规则',
+    rules: [
+      {tag: '监管视角', title: '赛事查看范围', content: '教育局端面向区域赛事监管，可查看中心基地和学校创建的赛事数据，用于了解全市赛事开展情况。'},
+      {tag: '操作权限', title: '列表操作限制', content: '教育局端赛事列表仅保留“查看”操作，不提供创建、编辑、删除、上架、下架等管理操作。'},
+      {tag: '数据口径', title: '列表数据口径', content: '列表展示赛事创建来源、赛事状态、参赛作品数、上架状态等关键字段，便于教育局进行整体监督和过程跟踪。'},
+      {tag: '管理边界', title: '管理边界', content: '赛事的具体维护由创建方负责，教育局不直接修改赛事基础信息和发布状态。'}
+    ]
+  },
+  'review-scoring': {
+    title: '教育局端评审打分 - 业务规则',
+    rules: [
+      {tag: '评审参与', title: '评审参与规则', content: '教育局端可进入评审打分模块，对分配给教育局相关评审人员的作品进行评分或查看评分结果。'},
+      {tag: '评分提交', title: '评分确认规则', content: '评分提交前需完成各评分维度填写，提交后需输入汉字“确认”进行二次确认。'},
+      {tag: '不可编辑', title: '提交后锁定', content: '评分一旦确认提交即锁定，仅支持查看，不支持再次编辑，确保评审结果严肃性。'},
+      {tag: '分值约束', title: '分值校验', content: '各评分维度分值不得超过维度满分，系统自动汇总总分。'}
+    ]
+  },
+  'event-detail': {
+    title: '教育局端赛事详情 - 业务规则',
+    rules: [
+      {tag: '详情查看', title: '详情查看规则', content: '教育局端可查看赛事简介、参赛学校、评选规则、参赛作品和排行榜等信息，用于赛事过程监管。'},
+      {tag: '只读监管', title: '只读规则', content: '教育局端赛事详情以查看为主，不支持编辑赛事信息、修改评选规则、上下架或删除赛事。'},
+      {tag: '过程跟踪', title: '过程跟踪规则', content: '通过参赛学校、参赛作品、排行榜等信息跟踪赛事报名、投稿、评审和结果产出情况。'},
+      {tag: '结果查看', title: '结果查看规则', content: '赛事排行榜按总得分展示排名情况，不展示获奖等级，教育局可用于结果审核和备案查看。'}
+    ]
+  }
+};
+
 function renderRulePanel() {
-  var rules = businessRules[currentPage];
+  var ruleSource = currentClient === 'education-bureau' ? educationBureauBusinessRules : businessRules;
+  var rules = ruleSource[currentPage] || businessRules[currentPage];
   if (!rules) return '';
   
   var ruleHtml = rules.rules.map(function(rule) {
