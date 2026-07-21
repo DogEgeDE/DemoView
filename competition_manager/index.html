@@ -189,6 +189,21 @@
     .side-code span { width: 32px; padding: 6px 8px; color: #fff; font-size: 12px; font-weight: 600; text-align: center; writing-mode: vertical-rl; letter-spacing: 2px; }
     .side-code .blue-code { background: var(--blue); }
     .side-code .green-code { background: var(--green); }
+    /* ===== Business rules ===== */
+    .rule-panel { position: fixed; top: 96px; right: 16px; z-index: 15; width: 292px; max-height: calc(100vh - 120px); padding: 14px; overflow-y: auto; border: 1px solid #f3d38a; border-left: 3px solid #fbbf24; border-radius: var(--radius-md); background: #fffbeb; box-shadow: var(--shadow-md); transition: width .25s ease, padding .25s ease; }
+    .rule-panel.collapsed { width: 42px; padding: 10px 8px; overflow: hidden; }
+    .rule-panel-header { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid #f6e3b0; color: #7c4a03; cursor: pointer; }
+    .rule-panel-icon { font-size: 15px; }
+    .rule-panel-title { flex: 1; font-size: 13px; font-weight: 600; white-space: nowrap; }
+    .rule-panel-toggle { font-size: 18px; line-height: 1; transition: transform .25s ease; }
+    .rule-panel.collapsed .rule-panel-title, .rule-panel.collapsed .rule-panel-body { display: none; }
+    .rule-panel.collapsed .rule-panel-toggle { transform: rotate(180deg); }
+    .rule-panel-body { padding-top: 12px; }
+    .rule-item { margin-bottom: 10px; padding: 10px; border-left: 3px solid #fbbf24; border-radius: var(--radius-sm); background: #fff; }
+    .rule-item:last-child { margin-bottom: 0; }
+    .rule-tag { display: inline-block; margin-bottom: 5px; padding: 1px 6px; border-radius: 3px; color: #92400e; background: #fef3c7; font-size: 10px; font-weight: 600; }
+    .rule-item h3 { margin-bottom: 4px; color: #4b340e; font-size: 12px; font-weight: 600; }
+    .rule-item p { color: #6b5a33; font-size: 11px; line-height: 1.65; }
     .hidden { display: none !important; }
     @media (max-width: 1450px) { .topnav { gap: 32px; } .sessions { grid-template-columns: repeat(3, minmax(200px, 1fr)); } .filter-panel { gap: 10px 16px; } }
   </style>
@@ -263,6 +278,17 @@
     </main>
   </div>
   <aside class="side-code"><span class="blue-code">家长小程序 «</span><span class="green-code">教师小程序 «</span></aside>
+  <aside class="rule-panel" id="rulePanel">
+    <div class="rule-panel-header" id="rulePanelToggle" role="button" tabindex="0" aria-expanded="true"><span class="rule-panel-icon">▤</span><span class="rule-panel-title">点名看板 · 业务规则</span><span class="rule-panel-toggle">›</span></div>
+    <div class="rule-panel-body">
+      <article class="rule-item"><span class="rule-tag">业务流程</span><h3>点名监控流程</h3><p>管理员设置查询条件与日期范围，按日期查看单日课节，或按课程查看区间汇总；据此跟进未点名课节。</p></article>
+      <article class="rule-item"><span class="rule-tag">状态规则</span><h3>点名状态定义</h3><p>课节仅包含“已点名”和“未点名”两种状态。已点名表示教师已完成本节学生考勤；未点名表示尚未提交考勤。</p></article>
+      <article class="rule-item"><span class="rule-tag">时间范围</span><h3>日期区间选择</h3><p>在日历中依次选择开始、结束日期后生效；两个查看方式均只展示该区间内的数据。当前原型数据覆盖 2026 年 6 月。</p></article>
+      <article class="rule-item"><span class="rule-tag">查询规则</span><h3>组合筛选</h3><p>教师、课程、节次和状态为组合条件，查询后仅保留同时满足全部已填写条件的课节；重置恢复全部条件。</p></article>
+      <article class="rule-item"><span class="rule-tag">数据指标</span><h3>看板统计口径</h3><p>“共 X 节”按当前日期、时间范围及筛选条件后的课节数计算；“已点名 X 节”仅统计状态为已点名的课节。</p></article>
+      <article class="rule-item"><span class="rule-tag">导出规则</span><h3>按当前查看方式导出</h3><p>导出继承当前筛选条件和时间范围：按日期导出单日明细，按课程导出区间汇总矩阵；文件为可直接用 Excel 打开的 CSV。</p></article>
+    </div>
+  </aside>
   <script>
     const dates = [
       { day: 22, weekday: '周一', hasClass: true }, { day: 23, weekday: '周二', hasClass: true },
@@ -408,6 +434,14 @@
       document.getElementById('dateContent').classList.toggle('hidden', isCourse);
       document.getElementById('courseContent').style.display = isCourse ? 'block' : 'none';
     }));
+    document.getElementById('rulePanelToggle').addEventListener('click', () => {
+      const panel = document.getElementById('rulePanel');
+      const collapsed = panel.classList.toggle('collapsed');
+      document.getElementById('rulePanelToggle').setAttribute('aria-expanded', String(!collapsed));
+    });
+    document.getElementById('rulePanelToggle').addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.currentTarget.click(); }
+    });
     document.getElementById('exportBtn').addEventListener('click', exportCurrentView);
     document.getElementById('calendarToggle').addEventListener('click', () => {
       const popover = document.getElementById('calendarPopover');
