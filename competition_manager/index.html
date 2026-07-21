@@ -104,9 +104,37 @@
     .nav-control button:hover { color: var(--ink); background: var(--bg); }
     .nav-control button:last-child { border-right: 0; }
     .nav-control .return-btn { padding: 0 10px; font-size: 13px; color: var(--ink-secondary); font-weight: 500; }
+    .calendar-picker { position: relative; }
     .calendar-button { display: flex; gap: 6px; align-items: center; height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink-secondary); background: #fff; font-size: 13px; font-weight: 500; transition: all .15s; }
-    .calendar-button:hover { border-color: var(--blue); color: var(--blue); }
-    .calendar-icon { font-size: 14px; }
+    .calendar-button:hover, .calendar-button.active { border-color: var(--blue); color: var(--blue); }
+    .export-button { display: flex; gap: 5px; align-items: center; height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink-secondary); background: #fff; font-size: 13px; font-weight: 500; transition: all .15s; }
+    .export-button:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+    .calendar-popover { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; display: none; width: 600px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-lg); }
+    .calendar-popover.open { display: block; }
+    .picker-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .picker-title { color: var(--ink); font-size: 14px; font-weight: 600; }
+    .picker-nav { display: flex; gap: 4px; }
+    .picker-nav button { display: grid; width: 28px; height: 28px; place-items: center; border-radius: var(--radius-sm); color: var(--ink-secondary); font-size: 18px; }
+    .picker-nav button:hover { color: var(--blue); background: var(--blue-pale); }
+    .calendar-months { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .month-title { margin-bottom: 10px; color: var(--ink); font-size: 13px; font-weight: 600; text-align: center; }
+    .calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .calendar-weekdays { margin-bottom: 4px; color: var(--ink-tertiary); font-size: 11px; text-align: center; }
+    .calendar-day { position: relative; z-index: 0; display: grid; height: 30px; place-items: center; color: var(--ink-secondary); font-size: 12px; cursor: pointer; }
+    .calendar-day:hover { color: var(--blue); background: var(--blue-pale); border-radius: var(--radius-sm); }
+    .calendar-day.outside { color: #c9cdd4; pointer-events: none; }
+    .calendar-day.in-range::before { content: ""; position: absolute; z-index: -1; inset: 3px 0; background: var(--blue-pale); }
+    .calendar-day.range-start, .calendar-day.range-end { color: #fff; font-weight: 600; }
+    .calendar-day.range-start::after, .calendar-day.range-end::after { content: ""; position: absolute; z-index: -1; width: 26px; height: 26px; border-radius: 50%; background: var(--blue); }
+    .calendar-day.range-start::before { right: 0; left: 50%; }
+    .calendar-day.range-end::before { right: 50%; left: 0; }
+    .picker-range-text { margin-top: 14px; padding: 8px 10px; border-radius: var(--radius-sm); color: var(--ink-secondary); background: var(--bg); font-size: 12px; }
+    .picker-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .picker-actions button { height: 30px; padding: 0 12px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; }
+    .picker-clear { color: var(--ink-secondary); background: var(--bg); }
+    .picker-confirm { color: #fff; background: var(--blue); }
+    .picker-confirm:hover { background: var(--blue-hover); }
+    .course-view .today, .course-view .nav-control { display: none; }
     /* ===== Date strip ===== */
     .date-strip { display: grid; grid-template-columns: 120px repeat(7, 1fr); margin: 0 20px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: #fafbfc; }
     .slot-label, .date-cell { height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--line); }
@@ -211,7 +239,16 @@
             </div>
             <strong class="today" id="todayLabel">6月26日&nbsp; 周五</strong>
             <div class="nav-control"><button id="prevDay" aria-label="前一天">‹</button><button class="return-btn" id="todayBtn">回到今天</button><button id="nextDay" aria-label="后一天">›</button></div>
-            <button class="calendar-button">▣ <span>日历</span></button>
+            <button class="export-button" id="exportBtn">⇩ 导出</button>
+            <div class="calendar-picker">
+              <button class="calendar-button" id="calendarToggle" aria-expanded="false">▣ <span id="calendarLabel">2026年6月</span></button>
+              <div class="calendar-popover" id="calendarPopover">
+                <div class="picker-header"><p class="picker-title">选择日期区间</p><div class="picker-nav"><button id="prevMonth" aria-label="上个月">‹</button><button id="nextMonth" aria-label="下个月">›</button></div></div>
+                <div class="calendar-months" id="calendarMonths"></div>
+                <p class="picker-range-text" id="pickerRangeText">已选：2026年6月22日 至 2026年6月28日</p>
+                <div class="picker-actions"><button class="picker-clear" id="clearRange">清除</button><button class="picker-confirm" id="confirmRange">确定</button></div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="dateContent">
@@ -253,8 +290,27 @@
       { date: 26, course: '校园足球', teacher: '王丽君', phone: '15692329896', scheme: '三年级调班', time: '16:35-17:30', period: '第2节', status: 'done' }
     ];
     const statusText = { done: '已点名', pending: '未点名' };
+    const defaultRange = { start: '2026-06-22', end: '2026-06-28', month: '2026-06' };
     let activeDay = 26;
+    let dateRange = { ...defaultRange };
+    let pendingRange = { start: defaultRange.start, end: defaultRange.end };
+    let calendarMonth = new Date(2026, 5, 1);
     let filters = { teacher: '', course: '', period: '', status: '' };
+
+    const formatDate = value => {
+      const [year, month, day] = value.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    };
+    const dateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const dateLabel = value => {
+      const date = formatDate(value);
+      return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+    };
+    const formatRangeLabel = () => `${formatDate(dateRange.start).getMonth() + 1}月${formatDate(dateRange.start).getDate()}日—${formatDate(dateRange.end).getMonth() + 1}月${formatDate(dateRange.end).getDate()}日`;
+    const inSelectedRange = day => {
+      const date = `2026-06-${String(day).padStart(2, '0')}`;
+      return date >= dateRange.start && date <= dateRange.end;
+    };
 
     const match = item =>
       (!filters.teacher || item.teacher.includes(filters.teacher)) &&
@@ -262,32 +318,139 @@
       (!filters.period || item.period === filters.period) &&
       (!filters.status || item.status === filters.status);
     const filtered = () => sessions.filter(match);
+    const csvCell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    function downloadCsv(filename, rows) {
+      const content = `\uFEFF${rows.map(row => row.map(csvCell).join(',')).join('\r\n')}`;
+      const url = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8;' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    function exportCurrentView() {
+      const isCourseView = document.querySelector('.view-tab.active').dataset.view === 'course';
+      const scoped = filtered().filter(s => inSelectedRange(s.date));
+      if (!isCourseView) {
+        const shown = scoped.filter(s => s.date === activeDay);
+        downloadCsv(`点名看板-按日期-${dateRange.month}-${String(activeDay).padStart(2, '0')}.csv`, [
+          ['日期', '星期', '课程名称', '节次', '上课时间', '教师姓名', '联系电话', '归属方案', '点名状态'],
+          ...shown.map(s => [`2026-06-${String(s.date).padStart(2, '0')}`, dates.find(d => d.day === s.date).weekday, s.course, s.period, s.time, s.teacher, s.phone, s.scheme, statusText[s.status]])
+        ]);
+        return;
+      }
+      const rangeDates = dates.filter(d => inSelectedRange(d.day));
+      const courses = [...new Map(scoped.map(s => [s.course, s])).values()];
+      downloadCsv(`点名看板-按课程-${dateRange.start}_至_${dateRange.end}.csv`, [
+        ['课程名称', '教师姓名', '归属方案', ...rangeDates.map(d => `${d.day}日${d.weekday}`)],
+        ...courses.map(course => {
+          const perCourse = scoped.filter(s => s.course === course.course);
+          return [course.course, course.teacher, course.scheme, ...rangeDates.map(d => perCourse.filter(s => s.date === d.day).map(s => `${statusText[s.status]}（${s.period}）`).join('；') || '—')];
+        })
+      ]);
+    }
 
     function renderDates() {
       document.getElementById('dateStrip').innerHTML = '<div class="slot-label">节次</div>' + dates.map(d => `<button class="date-cell ${d.hasClass ? 'has-class' : ''} ${d.day === activeDay ? 'active' : ''}" data-day="${d.day}"><span>${d.day}</span><span class="weekday">${d.weekday}</span></button>`).join('');
       document.querySelectorAll('.date-cell').forEach(el => el.addEventListener('click', () => { activeDay = +el.dataset.day; renderAll(); }));
       const date = dates.find(d => d.day === activeDay); document.getElementById('todayLabel').textContent = `6月${activeDay}日  ${date.weekday}`;
+      document.getElementById('calendarLabel').textContent = formatRangeLabel();
     }
     function renderSessions() {
-      const shown = filtered().filter(s => s.date === activeDay);
+      const shown = filtered().filter(s => s.date === activeDay && inSelectedRange(s.date));
       const doneCount = shown.filter(s => s.status === 'done').length;
       document.getElementById('dateCaption').textContent = `6月${activeDay}日（${dates.find(d => d.day === activeDay).weekday}）共 ${shown.length} 节校本课程，已点名 ${doneCount} 节`;
       document.getElementById('sessions').innerHTML = shown.length ? shown.map(s => `<article class="session-card ${s.status}"><div class="card-status"><span class="status-icon">♧</span>${statusText[s.status]}</div><div class="course-name">${s.course}-${dates.find(d => d.day === s.date).weekday}${s.period}</div><div class="session-info">上课时间：${s.time}<br>上课老师：${s.teacher} ${s.phone}<br>归属方案：${s.scheme}</div></article>`).join('') : '<div style="grid-column:1/-1;padding:56px;text-align:center;color:#9ca7b5">暂无符合条件的课程</div>';
     }
     function renderCourseTable() {
-      const all = filtered();
+      const all = filtered().filter(s => inSelectedRange(s.date));
       const courses = [...new Map(all.map(s => [s.course, s])).values()];
-      document.getElementById('courseHead').innerHTML = `<tr><th>课程名称</th>${dates.map(d => `<th>${d.day}日<br><small>${d.weekday}</small></th>`).join('')}</tr>`;
+      const rangeDates = dates.filter(d => inSelectedRange(d.day));
+      document.getElementById('courseHead').innerHTML = `<tr><th>课程名称</th>${rangeDates.map(d => `<th>${d.day}日<br><small>${d.weekday}</small></th>`).join('')}</tr>`;
       document.getElementById('courseRows').innerHTML = courses.length ? courses.map((c, i) => {
         const perCourse = all.filter(s => s.course === c.course);
-        return `<tr><td><div class="course-main"><span class="course-round">${String(i + 1).padStart(2, '0')}</span><div><b>${c.course}</b><span>${c.teacher} · ${c.scheme}</span></div></div></td>${dates.map(d => { const ls = perCourse.filter(s => s.date === d.day); return ls.length ? ls.map(s => `<span class="lesson ${s.status}">${statusText[s.status]}<em>${s.period}</em></span>`).join('') : '<span class="empty-cell">—</span>'; }).map(v => `<td>${v}</td>`).join('')}</tr>`;
-      }).join('') : '<tr><td colspan="8" style="height:160px;color:#a2acba">暂无符合条件的课程</td></tr>';
+        return `<tr><td><div class="course-main"><span class="course-round">${String(i + 1).padStart(2, '0')}</span><div><b>${c.course}</b><span>${c.teacher} · ${c.scheme}</span></div></div></td>${rangeDates.map(d => { const ls = perCourse.filter(s => s.date === d.day); return ls.length ? ls.map(s => `<span class="lesson ${s.status}">${statusText[s.status]}<em>${s.period}</em></span>`).join('') : '<span class="empty-cell">—</span>'; }).map(v => `<td>${v}</td>`).join('')}</tr>`;
+      }).join('') : `<tr><td colspan="${rangeDates.length + 1}" style="height:160px;color:#a2acba">暂无符合条件的课程</td></tr>`;
+      document.querySelector('.course-summary > span:nth-child(2)').textContent = `按课程汇总 ${formatRangeLabel()} 全部课节的点名状态`;
+    }
+    function renderCalendarMonth(month) {
+      const year = month.getFullYear();
+      const monthIndex = month.getMonth();
+      const firstDay = new Date(year, monthIndex, 1).getDay();
+      const dayCount = new Date(year, monthIndex + 1, 0).getDate();
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const cells = Array.from({ length: firstDay }, () => '<span class="calendar-day outside"></span>');
+      for (let day = 1; day <= dayCount; day += 1) {
+        const value = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isStart = value === pendingRange.start;
+        const isEnd = value === pendingRange.end;
+        const isInRange = pendingRange.start && pendingRange.end && value >= pendingRange.start && value <= pendingRange.end;
+        cells.push(`<button class="calendar-day ${isInRange ? 'in-range' : ''} ${isStart ? 'range-start' : ''} ${isEnd ? 'range-end' : ''}" data-date="${value}">${day}</button>`);
+      }
+      return `<section><h3 class="month-title">${year}年${monthIndex + 1}月</h3><div class="calendar-weekdays">${weekdays.map(day => `<span>${day}</span>`).join('')}</div><div class="calendar-days">${cells.join('')}</div></section>`;
+    }
+    function renderCalendar() {
+      const nextMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+      document.getElementById('calendarMonths').innerHTML = renderCalendarMonth(calendarMonth) + renderCalendarMonth(nextMonth);
+      document.getElementById('pickerRangeText').textContent = pendingRange.start ? `已选：${dateLabel(pendingRange.start)}${pendingRange.end ? ` 至 ${dateLabel(pendingRange.end)}` : '，请选择结束日期'}` : '请选择开始日期';
+      document.querySelectorAll('.calendar-day[data-date]').forEach(button => button.addEventListener('click', () => {
+        const selected = button.dataset.date;
+        if (!pendingRange.start || pendingRange.end || selected < pendingRange.start) pendingRange = { start: selected, end: '' };
+        else pendingRange.end = selected;
+        renderCalendar();
+      }));
     }
     function renderAll() { renderDates(); renderSessions(); renderCourseTable(); }
     document.querySelectorAll('.view-tab').forEach(tab => tab.addEventListener('click', () => {
       document.querySelectorAll('.view-tab').forEach(t => { t.classList.toggle('active', t === tab); t.setAttribute('aria-selected', t === tab); });
-      const isCourse = tab.dataset.view === 'course'; document.getElementById('dateContent').classList.toggle('hidden', isCourse); document.getElementById('courseContent').style.display = isCourse ? 'block' : 'none';
+      const isCourse = tab.dataset.view === 'course';
+      document.querySelector('.board-head').classList.toggle('course-view', isCourse);
+      document.getElementById('dateContent').classList.toggle('hidden', isCourse);
+      document.getElementById('courseContent').style.display = isCourse ? 'block' : 'none';
     }));
+    document.getElementById('exportBtn').addEventListener('click', exportCurrentView);
+    document.getElementById('calendarToggle').addEventListener('click', () => {
+      const popover = document.getElementById('calendarPopover');
+      const isOpen = popover.classList.toggle('open');
+      document.getElementById('calendarToggle').classList.toggle('active', isOpen);
+      document.getElementById('calendarToggle').setAttribute('aria-expanded', isOpen);
+      if (isOpen) { pendingRange = { start: dateRange.start, end: dateRange.end }; renderCalendar(); }
+    });
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+      renderCalendar();
+    });
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+      renderCalendar();
+    });
+    document.getElementById('confirmRange').addEventListener('click', () => {
+      if (!pendingRange.start || !pendingRange.end) return;
+      dateRange = { start: pendingRange.start, end: pendingRange.end, month: pendingRange.start.slice(0, 7) };
+      if (!inSelectedRange(activeDay) && dateRange.month === '2026-06') activeDay = Number(dateRange.start.slice(-2));
+      document.getElementById('calendarPopover').classList.remove('open');
+      document.getElementById('calendarToggle').classList.remove('active');
+      document.getElementById('calendarToggle').setAttribute('aria-expanded', 'false');
+      renderAll();
+    });
+    document.getElementById('clearRange').addEventListener('click', () => {
+      dateRange = { ...defaultRange };
+      pendingRange = { start: defaultRange.start, end: defaultRange.end };
+      calendarMonth = new Date(2026, 5, 1);
+      activeDay = 26;
+      document.getElementById('calendarPopover').classList.remove('open');
+      document.getElementById('calendarToggle').classList.remove('active');
+      document.getElementById('calendarToggle').setAttribute('aria-expanded', 'false');
+      renderAll();
+    });
+    document.addEventListener('click', event => {
+      const picker = document.querySelector('.calendar-picker');
+      if (!picker.contains(event.target)) {
+        document.getElementById('calendarPopover').classList.remove('open');
+        document.getElementById('calendarToggle').classList.remove('active');
+        document.getElementById('calendarToggle').setAttribute('aria-expanded', 'false');
+      }
+    });
     document.getElementById('searchBtn').addEventListener('click', () => { filters = { teacher: document.getElementById('teacher').value.trim(), course: document.getElementById('course').value.trim(), period: document.getElementById('period').value, status: document.getElementById('state').value }; renderSessions(); renderCourseTable(); });
     document.getElementById('resetBtn').addEventListener('click', () => { ['teacher','course','period','state'].forEach(id => document.getElementById(id).value = ''); filters = { teacher: '', course: '', period: '', status: '' }; renderSessions(); renderCourseTable(); });
     document.getElementById('prevDay').addEventListener('click', () => { const i = dates.findIndex(d => d.day === activeDay); activeDay = dates[Math.max(0, i - 1)].day; renderAll(); });
