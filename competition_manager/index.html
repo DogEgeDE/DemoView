@@ -1,61 +1,299 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>赛事管理系统原型</title>
-  <meta http-equiv="refresh" content="0; url=./center-base.html">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>点名看板原型</title>
   <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      background: #f5f7fb;
-      color: #1f2937;
+    :root {
+      --blue: #3370ff;
+      --blue-hover: #2860e1;
+      --blue-pale: #eef3ff;
+      --ink: #1d2129;
+      --ink-secondary: #4e5969;
+      --ink-tertiary: #86909c;
+      --line: #e5e6eb;
+      --bg: #f7f8fa;
+      --green: #00b42a;
+      --green-bg: #e8ffea;
+      --orange: #ff7d00;
+      --orange-bg: #fff7e8;
+      --sidebar: 240px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,.1);
     }
-    .entry-card {
-      width: 360px;
-      padding: 28px;
-      border-radius: 16px;
-      background: #fff;
-      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
-      text-align: center;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: 20px;
-    }
-    p {
-      margin: 0 0 20px;
-      color: #64748b;
-      font-size: 14px;
-    }
-    a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 40px;
-      padding: 0 18px;
-      border-radius: 10px;
-      background: #2563eb;
-      color: #fff;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-width: 1180px; color: var(--ink); font: 14px/1.5715 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); -webkit-font-smoothing: antialiased; }
+    button, input, select { font: inherit; border: 0; outline: 0; }
+    button { cursor: pointer; background: none; }
+    /* ===== Topbar ===== */
+    .topbar { height: 56px; display: flex; align-items: center; padding: 0 20px; color: #fff; background: linear-gradient(135deg, #3370ff 0%, #2b5fd9 100%); box-shadow: 0 1px 4px rgba(0,0,0,.12); position: relative; z-index: 10; }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; letter-spacing: .3px; }
+    .brand-mark { width: 32px; height: 32px; position: relative; overflow: hidden; border-radius: 8px; background: rgba(255,255,255,.15); }
+    .brand-mark:before, .brand-mark:after { content: ""; position: absolute; border: 3px solid #fff; border-radius: 50%; transform: rotate(32deg); opacity: .9; }
+    .brand-mark:before { width: 16px; height: 16px; left: 6px; top: 6px; border-left-color: transparent; }
+    .brand-mark:after { width: 9px; height: 9px; left: 13px; top: 13px; border-right-color: transparent; }
+    .school-switch { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 400; opacity: .85; margin-left: 8px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,.25); }
+    .arrow { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; opacity: .7; }
+    .topnav { display: flex; align-items: center; justify-content: center; gap: 48px; height: 100%; flex: 1; }
+    .topnav-item { position: relative; display: grid; place-items: center; height: 100%; padding: 0 8px; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.75); transition: color .2s; cursor: pointer; }
+    .topnav-item:hover { color: #fff; }
+    .topnav-item.active { color: #fff; font-weight: 600; }
+    .topnav-item.active:after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 32px; height: 2px; border-radius: 1px; background: #fff; }
+    .top-actions { display: flex; gap: 16px; align-items: center; margin-left: 32px; }
+    .bell { position: relative; font-size: 18px; line-height: 1; opacity: .85; cursor: pointer; }
+    .bell:hover { opacity: 1; }
+    .notice { position: absolute; top: -8px; right: -10px; min-width: 18px; height: 18px; padding: 0 5px; border: 2px solid #3370ff; border-radius: 9px; background: #f53f3f; color: #fff; font-size: 11px; font-weight: 600; line-height: 14px; text-align: center; }
+    .expand { font-size: 18px; opacity: .85; cursor: pointer; }
+    .expand:hover { opacity: 1; }
+    .avatar { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: rgba(255,255,255,.2); font-size: 13px; font-weight: 600; cursor: pointer; }
+    .avatar:hover { background: rgba(255,255,255,.3); }
+    /* ===== Page layout ===== */
+    .page { display: flex; min-height: calc(100vh - 56px); }
+    .sidebar { flex: 0 0 var(--sidebar); padding: 8px 8px 16px; background: #fff; border-right: 1px solid var(--line); overflow-y: auto; }
+    .menu-group { margin-bottom: 4px; }
+    .menu-item { height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: var(--radius-sm); color: var(--ink-secondary); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all .15s; }
+    .menu-item:hover { color: var(--ink); background: var(--bg); }
+    .menu-item .mi { display: grid; place-items: center; width: 18px; height: 18px; color: currentColor; font-size: 16px; opacity: .65; }
+    .menu-item .chev { margin-left: auto; font-size: 12px; opacity: .4; }
+    .menu-item.parent-selected { color: var(--blue); font-weight: 600; }
+    .menu-item.parent-selected .mi { opacity: 1; }
+    .menu-sub { margin: 4px 0; padding: 4px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .menu-sub .menu-item { padding-left: 36px; }
+    .menu-sub .selected { color: var(--blue); background: var(--blue-pale); font-weight: 600; }
+    .menu-sub .selected .mi { opacity: 1; }
+    .sidebar-bottom { position: fixed; bottom: 0; left: 0; width: var(--sidebar); height: 40px; display: grid; place-items: center; background: #fff; border-top: 1px solid var(--line); font-size: 16px; color: var(--ink-tertiary); cursor: pointer; }
+    .sidebar-bottom:hover { color: var(--ink); background: var(--bg); }
+    /* ===== Main ===== */
+    .main { width: calc(100% - var(--sidebar)); padding: 16px 20px 24px; overflow: hidden; }
+    .crumb { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--ink-tertiary); font-size: 13px; font-weight: 500; }
+    .crumb strong { color: var(--ink); font-weight: 600; }
+    .home { font-size: 15px; color: var(--ink-tertiary); cursor: pointer; }
+    .home:hover { color: var(--blue); }
+    /* ===== Filter panel ===== */
+    .filter-panel { display: grid; grid-template-columns: 1fr 1fr 1fr 120px; gap: 12px 20px; align-items: start; padding: 16px 20px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: #fff; }
+    .field { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .field label { flex: 0 0 auto; color: var(--ink-secondary); font-size: 13px; font-weight: 500; }
+    .field input, .field select { width: 100%; height: 36px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 12px; color: var(--ink); font-size: 13px; background: #fff; transition: border-color .2s, box-shadow .2s; }
+    .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(51,112,255,.15); }
+    .field input::placeholder { color: var(--ink-tertiary); }
+    .field select { appearance: auto; cursor: pointer; }
+    .status-field { grid-row: 2; }
+    .filter-actions { grid-column: 4; grid-row: 1 / span 2; display: flex; flex-direction: column; gap: 8px; padding-left: 20px; border-left: 1px solid var(--line); }
+    .btn { height: 36px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; transition: all .15s; }
+    .btn.primary { color: #fff; background: var(--blue); }
+    .btn.primary:hover { background: var(--blue-hover); box-shadow: 0 2px 6px rgba(51,112,255,.3); }
+    .btn.secondary { color: var(--ink-secondary); background: var(--bg); border: 1px solid var(--line); }
+    .btn.secondary:hover { color: var(--ink); border-color: #c9cdd4; }
+    /* ===== Board ===== */
+    .board { min-height: 500px; border-top: 1px solid var(--line); border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: #fff; }
+    .board-head { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+    .board-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+    .head-right { display: flex; align-items: center; gap: 12px; }
+    .view-tabs { display: flex; padding: 3px; border-radius: var(--radius-sm); background: var(--bg); }
+    .view-tab { border: 0; padding: 5px 14px; border-radius: var(--radius-sm); color: var(--ink-tertiary); background: transparent; font-size: 13px; font-weight: 500; transition: all .15s; }
+    .view-tab:hover { color: var(--ink-secondary); }
+    .view-tab.active { color: var(--ink); background: #fff; box-shadow: var(--shadow-sm); font-weight: 600; }
+    .today { color: var(--ink); font-size: 14px; font-weight: 600; }
+    .nav-control { display: flex; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+    .nav-control button { height: 30px; min-width: 30px; border: 0; border-right: 1px solid var(--line); background: #fff; color: var(--ink-tertiary); font-size: 16px; transition: all .15s; }
+    .nav-control button:hover { color: var(--ink); background: var(--bg); }
+    .nav-control button:last-child { border-right: 0; }
+    .nav-control .return-btn { padding: 0 10px; font-size: 13px; color: var(--ink-secondary); font-weight: 500; }
+    .calendar-button { display: flex; gap: 6px; align-items: center; height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink-secondary); background: #fff; font-size: 13px; font-weight: 500; transition: all .15s; }
+    .calendar-button:hover { border-color: var(--blue); color: var(--blue); }
+    .calendar-icon { font-size: 14px; }
+    /* ===== Date strip ===== */
+    .date-strip { display: grid; grid-template-columns: 120px repeat(7, 1fr); margin: 0 20px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: #fafbfc; }
+    .slot-label, .date-cell { height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--line); }
+    .slot-label { color: var(--ink-tertiary); font-size: 13px; font-weight: 500; }
+    .date-cell { position: relative; color: var(--ink-secondary); font-size: 15px; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .date-cell:hover { background: var(--blue-pale); }
+    .date-cell:last-child { border-right: 0; }
+    .date-cell .weekday { margin-top: 1px; font-size: 12px; font-weight: 400; color: var(--ink-tertiary); }
+    .date-cell.has-class { background: var(--blue-pale); }
+    .date-cell.has-class:after { content: ""; position: absolute; top: 8px; right: 12px; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+    .date-cell.active { color: #fff; background: var(--blue); }
+    .date-cell.active .weekday { color: rgba(255,255,255,.8); }
+    .date-cell.active:after { background: #fff; }
+    /* ===== Date board ===== */
+    .date-board { margin: 0 20px; padding: 16px 0 24px 120px; min-height: 400px; background: linear-gradient(90deg, #f7f8fa 0, #f7f8fa 120px, #fff 120px); }
+    .board-caption { margin: 0 0 12px; color: var(--ink-tertiary); font-size: 13px; }
+    .sessions { display: grid; grid-template-columns: repeat(4, minmax(200px, 1fr)); gap: 12px; padding-right: 20px; }
+    .session-card { padding: 16px; border-radius: var(--radius-md); background: #fff; border: 1px solid var(--line); transition: all .2s; }
+    .session-card:hover { border-color: var(--blue); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .card-status { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--green); font-size: 13px; font-weight: 600; }
+    .status-icon { display: grid; width: 28px; height: 28px; place-items: center; border-radius: var(--radius-sm); color: #fff; background: var(--green); font-size: 14px; }
+    .session-card.pending .card-status { color: var(--ink-tertiary); }
+    .session-card.pending .status-icon { background: #c9cdd4; }
+    .course-name { margin-bottom: 8px; overflow: hidden; color: var(--ink); font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+    .session-info { color: var(--ink-tertiary); font-size: 12px; line-height: 1.8; white-space: nowrap; }
+    /* ===== Course panel ===== */
+    .course-panel { display: none; margin: 0 20px; padding: 0 0 24px; }
+    .course-summary { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--ink-tertiary); font-size: 13px; }
+    .summary-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .course-table-wrap { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); }
+    .course-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+    .course-table th { height: 44px; color: var(--ink-tertiary); background: #fafbfc; font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--line); }
+    .course-table th:first-child { width: 220px; text-align: left; padding-left: 16px; }
+    .course-table td { height: 60px; border-top: 1px solid var(--line); text-align: center; color: var(--ink-secondary); }
+    .course-table tr:hover td { background: #fafbfc; }
+    .course-table td:first-child { padding: 0 12px 0 16px; text-align: left; }
+    .course-main { display: flex; align-items: center; gap: 10px; }
+    .course-round { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: var(--radius-sm); color: var(--blue); background: var(--blue-pale); font-size: 12px; font-weight: 700; }
+    .course-main b { display: block; margin-bottom: 1px; color: var(--ink); font-size: 13px; font-weight: 600; }
+    .course-main span { color: var(--ink-tertiary); font-size: 11px; }
+    .lesson { display: inline-flex; min-width: 68px; flex-direction: column; align-items: center; gap: 1px; padding: 4px 6px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; line-height: 1.3; }
+    .lesson.done { color: var(--green); background: var(--green-bg); }
+    .lesson.pending { color: var(--ink-tertiary); background: var(--bg); }
+    .lesson em { font-style: normal; font-size: 11px; opacity: .75; }
+    .empty-cell { color: #c9cdd4; }
+    .legend { display: flex; gap: 16px; margin-left: auto; }
+    .legend span { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-tertiary); }
+    .legend i { width: 8px; height: 8px; border-radius: 2px; background: var(--green); display: inline-block; }
+    .legend .pending-dot { background: #c9cdd4; }
+    /* ===== Side code ===== */
+    .side-code { position: fixed; top: 280px; right: 0; display: flex; flex-direction: column; z-index: 5; overflow: hidden; border-radius: var(--radius-sm) 0 0 var(--radius-sm); box-shadow: var(--shadow-md); }
+    .side-code span { width: 32px; padding: 6px 8px; color: #fff; font-size: 12px; font-weight: 600; text-align: center; writing-mode: vertical-rl; letter-spacing: 2px; }
+    .side-code .blue-code { background: var(--blue); }
+    .side-code .green-code { background: var(--green); }
+    .hidden { display: none !important; }
+    @media (max-width: 1450px) { .topnav { gap: 32px; } .sessions { grid-template-columns: repeat(3, minmax(200px, 1fr)); } .filter-panel { gap: 10px 16px; } }
   </style>
 </head>
 <body>
-  <div class="entry-card">
-    <h1>赛事管理系统原型</h1>
-    <p>正在进入最新版本中心基地端页面...</p>
-    <a href="./center-base.html">立即进入</a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"></span><span>青岛大学路小学</span><span class="school-switch">学校 <i class="arrow"></i></span></div>
+    <nav class="topnav" aria-label="主导航"><span class="topnav-item">研学</span><span class="topnav-item active">课后服务</span><span class="topnav-item">劳动课</span></nav>
+    <div class="top-actions"><span class="bell">♧<b class="notice">99+</b></span><span class="expand">↗</span><span class="avatar">杨</span></div>
+  </header>
+  <div class="page">
+    <aside class="sidebar">
+      <div class="menu-group">
+        <div class="menu-item"><span class="mi">▦</span>教学管理<span class="chev">›</span></div>
+        <div class="menu-item"><span class="mi">▤</span>教学课表</div>
+        <div class="menu-item"><span class="mi">▣</span>教务管理<span class="chev">›</span></div>
+        <div class="menu-item"><span class="mi">▰</span>选课管理</div>
+        <div class="menu-item"><span class="mi">▧</span>选课总览</div>
+        <div class="menu-item"><span class="mi">▧</span>课堂记录<span class="chev">›</span></div>
+        <div class="menu-item"><span class="mi">⚙</span>巡课记录</div>
+        <div class="menu-item"><span class="mi">▱</span>报表管理<span class="chev">›</span></div>
+      </div>
+      <div class="menu-group menu-sub">
+        <div class="menu-item parent-selected"><span class="mi">▯</span>校本课管理<span class="chev">‹</span></div>
+        <div class="menu-item"><span class="mi">⚙</span>账单配置</div>
+        <div class="menu-item"><span class="mi">▣</span>账单明细</div>
+        <div class="menu-item selected"><span class="mi">♧</span>点名看板</div>
+      </div>
+      <div class="menu-item"><span class="mi">⚙</span>系统设置<span class="chev">›</span></div>
+      <div class="sidebar-bottom">«</div>
+    </aside>
+    <main class="main">
+      <div class="crumb"><span class="home">⌂</span><span>/</span><span>校本课管理</span><span>/</span><strong>点名看板</strong></div>
+      <section class="filter-panel" aria-label="筛选条件">
+        <div class="field"><label for="teacher">教师姓名</label><input id="teacher" placeholder="请输入教师姓名" /></div>
+        <div class="field"><label for="course">校本课名称</label><input id="course" placeholder="请输入课程名称" /></div>
+        <div class="field"><label for="period">节次</label><select id="period"><option value="">全部</option><option>第1节</option><option>第2节</option><option>第3节</option></select></div>
+        <div class="field status-field"><label for="state">点名状态</label><select id="state"><option value="">全部</option><option value="done">已点名</option><option value="pending">未点名</option></select></div>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">⌕&nbsp; 查询</button><button class="btn secondary" id="resetBtn">⟳&nbsp; 重置</button></div>
+      </section>
+      <section class="board">
+        <div class="board-head">
+          <h1 class="board-title">点名看板</h1>
+          <div class="head-right">
+            <div class="view-tabs" role="tablist" aria-label="查看维度">
+              <button class="view-tab active" data-view="date" role="tab" aria-selected="true">按日期查看</button>
+              <button class="view-tab" data-view="course" role="tab" aria-selected="false">按课程查看</button>
+            </div>
+            <strong class="today" id="todayLabel">6月26日&nbsp; 周五</strong>
+            <div class="nav-control"><button id="prevDay" aria-label="前一天">‹</button><button class="return-btn" id="todayBtn">回到今天</button><button id="nextDay" aria-label="后一天">›</button></div>
+            <button class="calendar-button">▣ <span>日历</span></button>
+          </div>
+        </div>
+        <div id="dateContent">
+          <div class="date-strip" id="dateStrip"></div>
+          <div class="date-board"><p class="board-caption" id="dateCaption">6月26日（周五）共 12 节校本课程，已点名 11 节</p><div class="sessions" id="sessions"></div></div>
+        </div>
+        <div id="courseContent" class="course-panel">
+          <div class="course-summary"><span class="summary-dot"></span><span>按课程汇总当前周（6月22日—6月28日）全部课节的点名状态</span><div class="legend"><span><i></i>已点名</span><span><i class="pending-dot"></i>未点名</span></div></div>
+          <div class="course-table-wrap"><table class="course-table"><thead id="courseHead"></thead><tbody id="courseRows"></tbody></table></div>
+        </div>
+      </section>
+    </main>
   </div>
+  <aside class="side-code"><span class="blue-code">家长小程序 «</span><span class="green-code">教师小程序 «</span></aside>
   <script>
-    window.location.replace('./center-base.html');
+    const dates = [
+      { day: 22, weekday: '周一', hasClass: true }, { day: 23, weekday: '周二', hasClass: true },
+      { day: 24, weekday: '周三', hasClass: false }, { day: 25, weekday: '周四', hasClass: true },
+      { day: 26, weekday: '周五', hasClass: true }, { day: 27, weekday: '周六', hasClass: false }, { day: 28, weekday: '周日', hasClass: false }
+    ];
+    const sessions = [
+      { date: 22, course: 'C++进阶编程', teacher: '贾文静', phone: '13869898878', scheme: '社团', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 22, course: '创意美术', teacher: '孙晓璐', phone: '13656542316', scheme: '三年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 23, course: '校园足球', teacher: '王丽君', phone: '15692329896', scheme: '三年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 23, course: '科学实验室', teacher: '张翔馨', phone: '13697679532', scheme: '四年级调班', time: '15:35-16:30', period: '第1节', status: 'pending' },
+      { date: 25, course: 'C++进阶编程', teacher: '贾文静', phone: '13869898878', scheme: '社团', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 25, course: '创意美术', teacher: '孙晓璐', phone: '13656542316', scheme: '三年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 25, course: '校园足球', teacher: '王丽君', phone: '15692329896', scheme: '三年级调班', time: '15:35-16:30', period: '第1节', status: 'pending' },
+      { date: 26, course: 'C++进阶编程', teacher: '贾文静', phone: '13869898878', scheme: '社团', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-三年1班', teacher: '张丹', phone: '15053265018', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'pending' },
+      { date: 26, course: '校内免费托管-三年4班', teacher: '张翔馨', phone: '13697679532', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-三年7班', teacher: '王丽君', phone: '15692329896', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-三年9班', teacher: '郑珊', phone: '18053265985', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-三年12班', teacher: '法斌冬', phone: '15153250963', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-四年1班', teacher: '周大状', phone: '18661763082', scheme: '4年级调班方案', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-四年2班', teacher: '于莲', phone: '13573819557', scheme: '4年级调班方案', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-四年3班', teacher: '陈晓雪', phone: '18669853392', scheme: '4年级调班方案', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校内免费托管-四年5班', teacher: '李燕', phone: '18669745312', scheme: '4年级调班方案', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: '校园足球', teacher: '王丽君', phone: '15692329896', scheme: '三年级调班', time: '16:35-17:30', period: '第2节', status: 'done' }
+    ];
+    const statusText = { done: '已点名', pending: '未点名' };
+    let activeDay = 26;
+    let filters = { teacher: '', course: '', period: '', status: '' };
+
+    const match = item =>
+      (!filters.teacher || item.teacher.includes(filters.teacher)) &&
+      (!filters.course || item.course.includes(filters.course)) &&
+      (!filters.period || item.period === filters.period) &&
+      (!filters.status || item.status === filters.status);
+    const filtered = () => sessions.filter(match);
+
+    function renderDates() {
+      document.getElementById('dateStrip').innerHTML = '<div class="slot-label">节次</div>' + dates.map(d => `<button class="date-cell ${d.hasClass ? 'has-class' : ''} ${d.day === activeDay ? 'active' : ''}" data-day="${d.day}"><span>${d.day}</span><span class="weekday">${d.weekday}</span></button>`).join('');
+      document.querySelectorAll('.date-cell').forEach(el => el.addEventListener('click', () => { activeDay = +el.dataset.day; renderAll(); }));
+      const date = dates.find(d => d.day === activeDay); document.getElementById('todayLabel').textContent = `6月${activeDay}日  ${date.weekday}`;
+    }
+    function renderSessions() {
+      const shown = filtered().filter(s => s.date === activeDay);
+      const doneCount = shown.filter(s => s.status === 'done').length;
+      document.getElementById('dateCaption').textContent = `6月${activeDay}日（${dates.find(d => d.day === activeDay).weekday}）共 ${shown.length} 节校本课程，已点名 ${doneCount} 节`;
+      document.getElementById('sessions').innerHTML = shown.length ? shown.map(s => `<article class="session-card ${s.status}"><div class="card-status"><span class="status-icon">♧</span>${statusText[s.status]}</div><div class="course-name">${s.course}-${dates.find(d => d.day === s.date).weekday}${s.period}</div><div class="session-info">上课时间：${s.time}<br>上课老师：${s.teacher} ${s.phone}<br>归属方案：${s.scheme}</div></article>`).join('') : '<div style="grid-column:1/-1;padding:56px;text-align:center;color:#9ca7b5">暂无符合条件的课程</div>';
+    }
+    function renderCourseTable() {
+      const all = filtered();
+      const courses = [...new Map(all.map(s => [s.course, s])).values()];
+      document.getElementById('courseHead').innerHTML = `<tr><th>课程名称</th>${dates.map(d => `<th>${d.day}日<br><small>${d.weekday}</small></th>`).join('')}</tr>`;
+      document.getElementById('courseRows').innerHTML = courses.length ? courses.map((c, i) => {
+        const perCourse = all.filter(s => s.course === c.course);
+        return `<tr><td><div class="course-main"><span class="course-round">${String(i + 1).padStart(2, '0')}</span><div><b>${c.course}</b><span>${c.teacher} · ${c.scheme}</span></div></div></td>${dates.map(d => { const ls = perCourse.filter(s => s.date === d.day); return ls.length ? ls.map(s => `<span class="lesson ${s.status}">${statusText[s.status]}<em>${s.period}</em></span>`).join('') : '<span class="empty-cell">—</span>'; }).map(v => `<td>${v}</td>`).join('')}</tr>`;
+      }).join('') : '<tr><td colspan="8" style="height:160px;color:#a2acba">暂无符合条件的课程</td></tr>';
+    }
+    function renderAll() { renderDates(); renderSessions(); renderCourseTable(); }
+    document.querySelectorAll('.view-tab').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('.view-tab').forEach(t => { t.classList.toggle('active', t === tab); t.setAttribute('aria-selected', t === tab); });
+      const isCourse = tab.dataset.view === 'course'; document.getElementById('dateContent').classList.toggle('hidden', isCourse); document.getElementById('courseContent').style.display = isCourse ? 'block' : 'none';
+    }));
+    document.getElementById('searchBtn').addEventListener('click', () => { filters = { teacher: document.getElementById('teacher').value.trim(), course: document.getElementById('course').value.trim(), period: document.getElementById('period').value, status: document.getElementById('state').value }; renderSessions(); renderCourseTable(); });
+    document.getElementById('resetBtn').addEventListener('click', () => { ['teacher','course','period','state'].forEach(id => document.getElementById(id).value = ''); filters = { teacher: '', course: '', period: '', status: '' }; renderSessions(); renderCourseTable(); });
+    document.getElementById('prevDay').addEventListener('click', () => { const i = dates.findIndex(d => d.day === activeDay); activeDay = dates[Math.max(0, i - 1)].day; renderAll(); });
+    document.getElementById('nextDay').addEventListener('click', () => { const i = dates.findIndex(d => d.day === activeDay); activeDay = dates[Math.min(dates.length - 1, i + 1)].day; renderAll(); });
+    document.getElementById('todayBtn').addEventListener('click', () => { activeDay = 26; renderAll(); });
+    renderAll();
   </script>
 </body>
 </html>
