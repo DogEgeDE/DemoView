@@ -134,7 +134,12 @@
     .picker-clear { color: var(--ink-secondary); background: var(--bg); }
     .picker-confirm { color: #fff; background: var(--blue); }
     .picker-confirm:hover { background: var(--blue-hover); }
-    .course-view .today, .course-view .nav-control { display: none; }
+    .course-view .today, .course-view .nav-control, .course-view .calendar-picker { display: none; }
+    .course-week-control { display: none; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+    .course-week-control button { width: 30px; height: 30px; color: var(--ink-tertiary); font-size: 16px; }
+    .course-week-control button:hover { color: var(--blue); background: var(--blue-pale); }
+    .course-week-label { min-width: 142px; padding: 0 10px; border-right: 1px solid var(--line); border-left: 1px solid var(--line); color: var(--ink-secondary); font-size: 12px; font-weight: 500; line-height: 30px; text-align: center; }
+    .course-view .course-week-control { display: flex; }
     /* ===== Date strip ===== */
     .date-strip { display: grid; grid-template-columns: 120px repeat(7, 1fr); margin: 0 20px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: #fafbfc; }
     .slot-label, .date-cell { height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--line); }
@@ -168,17 +173,29 @@
     .course-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
     .course-table th { height: 44px; color: var(--ink-tertiary); background: #fafbfc; font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--line); }
     .course-table th:first-child { width: 220px; text-align: left; padding-left: 16px; }
-    .course-table td { height: 60px; border-top: 1px solid var(--line); text-align: center; color: var(--ink-secondary); }
+    .course-table td { min-height: 60px; height: 60px; border-top: 1px solid var(--line); text-align: center; color: var(--ink-secondary); }
     .course-table tr:hover td { background: #fafbfc; }
     .course-table td:first-child { padding: 0 12px 0 16px; text-align: left; }
     .course-main { display: flex; align-items: center; gap: 10px; }
     .course-round { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: var(--radius-sm); color: var(--blue); background: var(--blue-pale); font-size: 12px; font-weight: 700; }
     .course-main b { display: block; margin-bottom: 1px; color: var(--ink); font-size: 13px; font-weight: 600; }
     .course-main span { color: var(--ink-tertiary); font-size: 11px; }
-    .lesson { display: inline-flex; min-width: 68px; flex-direction: column; align-items: center; gap: 1px; padding: 4px 6px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; line-height: 1.3; }
-    .lesson.done { color: var(--green); background: var(--green-bg); }
-    .lesson.pending { color: var(--ink-tertiary); background: var(--bg); }
-    .lesson em { font-style: normal; font-size: 11px; opacity: .75; }
+    .lesson { position: relative; display: inline-flex; min-width: 68px; flex-direction: column; align-items: center; gap: 1px; margin: 2px; padding: 4px 6px; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; line-height: 1.3; cursor: default; }
+    .lesson-tooltip { position: absolute; z-index: 20; bottom: calc(100% + 8px); left: 50%; width: 218px; padding: 10px 12px; border: 1px solid #dfe5ee; border-radius: 8px; color: var(--ink-secondary); background: #fff; box-shadow: 0 8px 20px rgba(20, 33, 61, .16); font-size: 12px; font-weight: 400; line-height: 1.75; text-align: left; transform: translateX(-50%) translateY(4px); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .16s ease, transform .16s ease, visibility .16s; }
+    .lesson-tooltip::after { position: absolute; bottom: -5px; left: calc(50% - 5px); width: 9px; height: 9px; border-right: 1px solid #dfe5ee; border-bottom: 1px solid #dfe5ee; background: #fff; content: ''; transform: rotate(45deg); }
+    .lesson:hover .lesson-tooltip, .lesson:focus .lesson-tooltip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .lesson-tooltip b { color: var(--ink); font-weight: 600; }
+    .lesson.period-1 { color: #2468d8; background: #edf4ff; border-color: #cfe1ff; }
+    .lesson.period-2 { color: #d26b08; background: #fff4e6; border-color: #ffddb1; }
+    .lesson.period-3 { color: #7b52c5; background: #f5efff; border-color: #dfd0ff; }
+    .lesson.pending { border-style: dashed; opacity: .7; }
+    .lesson em { font-style: normal; font-size: 11px; opacity: .8; }
+    .period-legend { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+    .period-legend span { display: inline-flex; align-items: center; gap: 3px; color: var(--ink-tertiary); font-size: 11px; }
+    .period-legend i { width: 7px; height: 7px; border-radius: 50%; }
+    .period-legend .period-1-dot { background: #2468d8; }
+    .period-legend .period-2-dot { background: #d26b08; }
+    .period-legend .period-3-dot { background: #7b52c5; }
     .empty-cell { color: #c9cdd4; }
     .legend { display: flex; gap: 16px; margin-left: auto; }
     .legend span { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-tertiary); }
@@ -254,6 +271,7 @@
             </div>
             <strong class="today" id="todayLabel">6月26日&nbsp; 周五</strong>
             <div class="nav-control"><button id="prevDay" aria-label="前一天">‹</button><button class="return-btn" id="todayBtn">回到今天</button><button id="nextDay" aria-label="后一天">›</button></div>
+            <div class="course-week-control" aria-label="按周切换"><button id="prevWeek" aria-label="上一周">‹</button><span class="course-week-label" id="courseWeekLabel">6月22日—6月28日</span><button id="nextWeek" aria-label="下一周">›</button></div>
             <button class="export-button" id="exportBtn">⇩ 导出</button>
             <div class="calendar-picker">
               <button class="calendar-button" id="calendarToggle" aria-expanded="false">▣ <span id="calendarLabel">2026年6月</span></button>
@@ -271,7 +289,7 @@
           <div class="date-board"><p class="board-caption" id="dateCaption">6月26日（周五）共 12 节校本课程，已点名 11 节</p><div class="sessions" id="sessions"></div></div>
         </div>
         <div id="courseContent" class="course-panel">
-          <div class="course-summary"><span class="summary-dot"></span><span>按课程汇总当前周（6月22日—6月28日）全部课节的点名状态</span><div class="legend"><span><i></i>已点名</span><span><i class="pending-dot"></i>未点名</span></div></div>
+          <div class="course-summary"><span class="summary-dot"></span><span>按课程汇总当前周（6月22日—6月28日）全部课节的点名状态</span><div class="period-legend"><span><i class="period-1-dot"></i>第1节</span><span><i class="period-2-dot"></i>第2节</span><span><i class="period-3-dot"></i>第3节</span></div><div class="legend"><span><i></i>已点名</span><span><i class="pending-dot"></i>未点名</span></div></div>
           <div class="course-table-wrap"><table class="course-table"><thead id="courseHead"></thead><tbody id="courseRows"></tbody></table></div>
         </div>
       </section>
@@ -281,12 +299,14 @@
   <aside class="rule-panel" id="rulePanel">
     <div class="rule-panel-header" id="rulePanelToggle" role="button" tabindex="0" aria-expanded="true"><span class="rule-panel-icon">▤</span><span class="rule-panel-title">点名看板 · 业务规则</span><span class="rule-panel-toggle">›</span></div>
     <div class="rule-panel-body">
-      <article class="rule-item"><span class="rule-tag">业务流程</span><h3>点名监控流程</h3><p>管理员设置查询条件与日期范围，按日期查看单日课节，或按课程查看区间汇总；据此跟进未点名课节。</p></article>
+      <article class="rule-item"><span class="rule-tag">业务流程</span><h3>点名监控流程</h3><p>管理员设置查询条件；按日期查看单日课节，按课程查看按周汇总，并据此跟进未点名课节。</p></article>
       <article class="rule-item"><span class="rule-tag">状态规则</span><h3>点名状态定义</h3><p>课节仅包含“已点名”和“未点名”两种状态。已点名表示教师已完成本节学生考勤；未点名表示尚未提交考勤。</p></article>
-      <article class="rule-item"><span class="rule-tag">时间范围</span><h3>日期区间选择</h3><p>在日历中依次选择开始、结束日期后生效；两个查看方式均只展示该区间内的数据。当前原型数据覆盖 2026 年 6 月。</p></article>
+      <article class="rule-item"><span class="rule-tag">时间范围</span><h3>按周查看课程记录</h3><p>按课程查看固定展示一个自然周（周一至周日），通过左右箭头切换周次；按日期查看仍可使用日历选择日期区间。</p></article>
+      <article class="rule-item"><span class="rule-tag">课节展示</span><h3>同日多节次区分</h3><p>同一课程在同一天有多个课节时，按节次分别展示：第1节为蓝色、第2节为橙色、第3节为紫色；未点名课节使用虚线边框辅助区分。</p></article>
+      <article class="rule-item"><span class="rule-tag">交互规则</span><h3>课节详情悬浮查看</h3><p>鼠标移入或键盘聚焦课程表中的课节标签，可查看该课节的上课时间、上课老师及联系电话、归属方案；无需跳转详情页。</p></article>
       <article class="rule-item"><span class="rule-tag">查询规则</span><h3>组合筛选</h3><p>教师、课程、节次和状态为组合条件，查询后仅保留同时满足全部已填写条件的课节；重置恢复全部条件。</p></article>
       <article class="rule-item"><span class="rule-tag">数据指标</span><h3>看板统计口径</h3><p>“共 X 节”按当前日期、时间范围及筛选条件后的课节数计算；“已点名 X 节”仅统计状态为已点名的课节。</p></article>
-      <article class="rule-item"><span class="rule-tag">导出规则</span><h3>按当前查看方式导出</h3><p>导出继承当前筛选条件和时间范围：按日期导出单日明细，按课程导出区间汇总矩阵；文件为可直接用 Excel 打开的 CSV。</p></article>
+      <article class="rule-item"><span class="rule-tag">导出规则</span><h3>按当前查看方式导出</h3><p>导出继承当前筛选条件：按日期导出单日明细，按课程导出当前周汇总矩阵；文件为可直接用 Excel 打开的 CSV。</p></article>
     </div>
   </aside>
   <script>
@@ -304,7 +324,10 @@
       { date: 25, course: '创意美术', teacher: '孙晓璐', phone: '13656542316', scheme: '三年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
       { date: 25, course: '校园足球', teacher: '王丽君', phone: '15692329896', scheme: '三年级调班', time: '15:35-16:30', period: '第1节', status: 'pending' },
       { date: 26, course: 'C++进阶编程', teacher: '贾文静', phone: '13869898878', scheme: '社团', time: '15:35-16:30', period: '第1节', status: 'done' },
+      { date: 26, course: 'C++进阶编程', teacher: '贾文静', phone: '13869898878', scheme: '社团', time: '16:35-17:30', period: '第2节', status: 'done' },
+      { date: 26, course: 'C++进阶编程', teacher: '贾文静', phone: '13869898878', scheme: '社团', time: '17:40-18:35', period: '第3节', status: 'pending' },
       { date: 26, course: '校内免费托管-三年1班', teacher: '张丹', phone: '15053265018', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'pending' },
+      { date: 26, course: '校内免费托管-三年1班', teacher: '张丹', phone: '15053265018', scheme: '3年级调班', time: '16:35-17:30', period: '第2节', status: 'done' },
       { date: 26, course: '校内免费托管-三年4班', teacher: '张翔馨', phone: '13697679532', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
       { date: 26, course: '校内免费托管-三年7班', teacher: '王丽君', phone: '15692329896', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
       { date: 26, course: '校内免费托管-三年9班', teacher: '郑珊', phone: '18053265985', scheme: '3年级调班', time: '15:35-16:30', period: '第1节', status: 'done' },
@@ -316,7 +339,13 @@
       { date: 26, course: '校园足球', teacher: '王丽君', phone: '15692329896', scheme: '三年级调班', time: '16:35-17:30', period: '第2节', status: 'done' }
     ];
     const statusText = { done: '已点名', pending: '未点名' };
-    const defaultRange = { start: '2026-06-22', end: '2026-06-28', month: '2026-06' };
+    const weeks = [
+      { label: '6月15日—6月21日', start: '2026-06-15', end: '2026-06-21', dates: [15, 16, 17, 18, 19, 20, 21] },
+      { label: '6月22日—6月28日', start: '2026-06-22', end: '2026-06-28', dates: [22, 23, 24, 25, 26, 27, 28] },
+      { label: '6月29日—7月5日', start: '2026-06-29', end: '2026-07-05', dates: [29, 30, 1, 2, 3, 4, 5] }
+    ];
+    let activeWeek = 1;
+    const defaultRange = { start: weeks[activeWeek].start, end: weeks[activeWeek].end, month: '2026-06' };
     let activeDay = 26;
     let dateRange = { ...defaultRange };
     let pendingRange = { start: defaultRange.start, end: defaultRange.end };
@@ -343,6 +372,7 @@
       (!filters.course || item.course.includes(filters.course)) &&
       (!filters.period || item.period === filters.period) &&
       (!filters.status || item.status === filters.status);
+    const periodClass = period => `period-${period.match(/\d+/)?.[0] || 1}`;
     const filtered = () => sessions.filter(match);
     const csvCell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
     function downloadCsv(filename, rows) {
@@ -365,12 +395,14 @@
         ]);
         return;
       }
-      const rangeDates = dates.filter(d => inSelectedRange(d.day));
-      const courses = [...new Map(scoped.map(s => [s.course, s])).values()];
-      downloadCsv(`点名看板-按课程-${dateRange.start}_至_${dateRange.end}.csv`, [
+      const week = weeks[activeWeek];
+      const rangeDates = week.dates.map((day, index) => ({ day, weekday: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][index] }));
+      const courses = [...new Map(filtered().filter(s => week.dates.includes(s.date)).map(s => [s.course, s])).values()];
+      const weekScoped = filtered().filter(s => week.dates.includes(s.date));
+      downloadCsv(`点名看板-按课程-${week.label}.csv`, [
         ['课程名称', '教师姓名', '归属方案', ...rangeDates.map(d => `${d.day}日${d.weekday}`)],
         ...courses.map(course => {
-          const perCourse = scoped.filter(s => s.course === course.course);
+          const perCourse = weekScoped.filter(s => s.course === course.course);
           return [course.course, course.teacher, course.scheme, ...rangeDates.map(d => perCourse.filter(s => s.date === d.day).map(s => `${statusText[s.status]}（${s.period}）`).join('；') || '—')];
         })
       ]);
@@ -389,15 +421,17 @@
       document.getElementById('sessions').innerHTML = shown.length ? shown.map(s => `<article class="session-card ${s.status}"><div class="card-status"><span class="status-icon">♧</span>${statusText[s.status]}</div><div class="course-name">${s.course}-${dates.find(d => d.day === s.date).weekday}${s.period}</div><div class="session-info">上课时间：${s.time}<br>上课老师：${s.teacher} ${s.phone}<br>归属方案：${s.scheme}</div></article>`).join('') : '<div style="grid-column:1/-1;padding:56px;text-align:center;color:#9ca7b5">暂无符合条件的课程</div>';
     }
     function renderCourseTable() {
-      const all = filtered().filter(s => inSelectedRange(s.date));
+      const week = weeks[activeWeek];
+      const weekDates = week.dates.map((day, index) => ({ day, weekday: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][index] }));
+      const all = filtered().filter(s => week.dates.includes(s.date));
       const courses = [...new Map(all.map(s => [s.course, s])).values()];
-      const rangeDates = dates.filter(d => inSelectedRange(d.day));
-      document.getElementById('courseHead').innerHTML = `<tr><th>课程名称</th>${rangeDates.map(d => `<th>${d.day}日<br><small>${d.weekday}</small></th>`).join('')}</tr>`;
+      document.getElementById('courseWeekLabel').textContent = week.label;
+      document.getElementById('courseHead').innerHTML = `<tr><th>课程名称</th>${weekDates.map(d => `<th>${d.day}日<br><small>${d.weekday}</small></th>`).join('')}</tr>`;
       document.getElementById('courseRows').innerHTML = courses.length ? courses.map((c, i) => {
         const perCourse = all.filter(s => s.course === c.course);
-        return `<tr><td><div class="course-main"><span class="course-round">${String(i + 1).padStart(2, '0')}</span><div><b>${c.course}</b><span>${c.teacher} · ${c.scheme}</span></div></div></td>${rangeDates.map(d => { const ls = perCourse.filter(s => s.date === d.day); return ls.length ? ls.map(s => `<span class="lesson ${s.status}">${statusText[s.status]}<em>${s.period}</em></span>`).join('') : '<span class="empty-cell">—</span>'; }).map(v => `<td>${v}</td>`).join('')}</tr>`;
-      }).join('') : `<tr><td colspan="${rangeDates.length + 1}" style="height:160px;color:#a2acba">暂无符合条件的课程</td></tr>`;
-      document.querySelector('.course-summary > span:nth-child(2)').textContent = `按课程汇总 ${formatRangeLabel()} 全部课节的点名状态`;
+        return `<tr><td><div class="course-main"><span class="course-round">${String(i + 1).padStart(2, '0')}</span><div><b>${c.course}</b><span>${c.teacher} · ${c.scheme}</span></div></div></td>${weekDates.map(d => { const lessons = perCourse.filter(s => s.date === d.day); return `<td>${lessons.length ? lessons.map(s => `<span class="lesson ${periodClass(s.period)} ${s.status}" tabindex="0">${statusText[s.status]}<em>${s.period}</em><span class="lesson-tooltip"><b>上课时间：</b>${s.time}<br><b>上课老师：</b>${s.teacher} ${s.phone}<br><b>归属方案：</b>${s.scheme}</span></span>`).join(' ') : '<span class="empty-cell">—</span>'}</td>`; }).join('')}</tr>`;
+      }).join('') : '<tr><td colspan="8" style="height:160px;color:#a2acba">本周暂无符合条件的课程</td></tr>';
+      document.querySelector('.course-summary > span:nth-child(2)').textContent = `按课程汇总 ${week.label} 全部课节的点名状态；同一日期的多节课将分别展示。`;
     }
     function renderCalendarMonth(month) {
       const year = month.getFullYear();
@@ -434,6 +468,14 @@
       document.getElementById('dateContent').classList.toggle('hidden', isCourse);
       document.getElementById('courseContent').style.display = isCourse ? 'block' : 'none';
     }));
+    document.getElementById('prevWeek').addEventListener('click', () => {
+      activeWeek = Math.max(0, activeWeek - 1);
+      renderCourseTable();
+    });
+    document.getElementById('nextWeek').addEventListener('click', () => {
+      activeWeek = Math.min(weeks.length - 1, activeWeek + 1);
+      renderCourseTable();
+    });
     document.getElementById('rulePanelToggle').addEventListener('click', () => {
       const panel = document.getElementById('rulePanel');
       const collapsed = panel.classList.toggle('collapsed');
