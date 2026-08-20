@@ -1,0 +1,8 @@
+{
+  "name": "告家长通知书演示页面",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 9233"
+  }
+}
