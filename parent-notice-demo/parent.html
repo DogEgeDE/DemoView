@@ -35,9 +35,9 @@
 <section class="pay-success" id="pay-success"><div><div class="success-mark">✓</div><h2>支付成功</h2><p>已完成活动报名，请等待活动通知。</p></div></section>
 <div class="entry-switch"><span>端入口</span><a href="index.html">运营</a><a href="school-create.html">学校</a><a href="institution-create.html">机构</a><a class="active" href="parent.html">家长</a></div>
 <script>
-let seconds=15,timer=null,isDrawing=false,hasSignature=false,ctx,canvas,last={x:0,y:0};
+let readingRule=JSON.parse(localStorage.getItem('noticeReadingRule')||'{"force":true,"duration":15}'),seconds=readingRule.force?readingRule.duration:0,timer=null,isDrawing=false,hasSignature=false,ctx,canvas,last={x:0,y:0};
 function openApply(){document.getElementById('activity-page').style.display='none';document.getElementById('activity-bottom').style.display='none';document.getElementById('form-page').style.display='block';document.getElementById('form-bottom').style.display='flex';document.getElementById('nav-title').textContent='活动报名'}
-function openNotice(){document.getElementById('notice-mask').style.display='block';seconds=15;updateTimer();clearInterval(timer);timer=setInterval(()=>{seconds--;updateTimer();if(seconds<=0){clearInterval(timer);document.getElementById('read-tip').textContent='已完成阅读，请签署告家长书';document.getElementById('sign-button').style.display='block'}},1000)}
+function openNotice(){readingRule=JSON.parse(localStorage.getItem('noticeReadingRule')||'{"force":true,"duration":15}');document.getElementById('notice-mask').style.display='block';clearInterval(timer);document.getElementById('sign-button').style.display='none';if(!readingRule.force){document.getElementById('read-tip').textContent='请阅读告家长书后完成电子签字';document.getElementById('sign-button').style.display='block';return}seconds=readingRule.duration;updateTimer();timer=setInterval(()=>{seconds--;updateTimer();if(seconds<=0){clearInterval(timer);document.getElementById('read-tip').textContent='已完成阅读，请签署告家长书';document.getElementById('sign-button').style.display='block'}},1000)}
 function closeNotice(){clearInterval(timer);document.getElementById('notice-mask').style.display='none'}
 function updateTimer(){document.getElementById('read-tip').innerHTML='请认真阅读告家长书（<strong>'+seconds+'秒</strong>）'}
 function showOrientation(){document.getElementById('orient-mask').style.display='flex'}
