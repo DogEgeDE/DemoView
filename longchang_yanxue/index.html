@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>隆昌集体研学 · 多端原型</title>
+    <style>
+      body { margin: 0; min-height: 100vh; font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: linear-gradient(135deg, #eef2ff, #f0fdf4); color: #182033; }
+      main { width: min(960px, calc(100% - 40px)); margin: 0 auto; padding: 72px 0 56px; }
+      h1 { margin: 0 0 8px; font-size: 32px; }
+      .desc { margin: 0 0 12px; color: #667085; line-height: 1.7; }
+      .url { display: inline-block; margin-bottom: 30px; padding: 6px 12px; border-radius: 6px; background: #e6edff; color: #1769ff; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+      .project { display: flex; flex-direction: column; justify-content: space-between; min-height: 180px; padding: 24px; border: 1px solid #e5eaf3; border-radius: 12px; background: #fff; color: inherit; text-decoration: none; box-shadow: 0 8px 24px rgba(31, 41, 55, .06); transition: transform .15s, box-shadow .15s; }
+      .project:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(23, 105, 255, .14); }
+      .project b { display: block; font-size: 20px; }
+      .project small { display: block; margin-top: 8px; color: #667085; line-height: 1.7; }
+      .project span { display: block; margin-top: 18px; color: #1769ff; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>隆昌集体研学线上化改造 · 多端交互原型</h1>
+      <p class="desc">基于真实业务梳理的可交互静态原型，覆盖基地端 / 学校端 / 机构端管理后台与学生 / 家长端移动端，支持五端协同流程演示（创建上架、协同配置、报名、分组排寝、点名、评价）。</p>
+      <span class="url">https://dogegede.github.io/DemoView/longchang_yanxue/</span>
+      <section class="grid" aria-label="端入口">
+        <a class="project" href="./admin/index.html">
+          <div><b>智慧研学后台（PC）</b><small>基地端 · 学校端 · 机构端三端切换，含集体研学管理、创建/编辑活动、活动详情、学生分组、机构用车与跟队老师配置、安排入住工作台、业务流程图与业务规则说明。</small></div>
+          <span>./admin/index.html</span>
+        </a>
+        <a class="project" href="./student/index.html">
+          <div><b>学生 / 家长端（移动）</b><small>活动浏览、未参与/已参与列表、立即报名、活动详情与行程单 Tab 切换、我的活动。</small></div>
+          <span>./student/index.html</span>
+        </a>
+      </section>
+    </main>
+  </body>
+</html>
