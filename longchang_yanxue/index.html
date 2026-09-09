@@ -1,29 +1,41 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>隆昌集体研学线上化改造</title>
-    <style>
-      body { margin: 0; min-height: 100vh; font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background: #f5f7fb; color: #182033; }
-      main { width: min(960px, calc(100% - 40px)); margin: 0 auto; padding: 56px 0; }
-      h1 { margin: 0 0 10px; font-size: 30px; }
-      p { margin: 0 0 28px; color: #667085; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-      .project { display: block; min-height: 128px; padding: 22px; border: 1px solid #e5eaf3; border-radius: 8px; background: #fff; color: inherit; text-decoration: none; box-shadow: 0 8px 24px rgba(31, 41, 55, .06); }
-      .project:hover { border-color: #1769ff; box-shadow: 0 12px 30px rgba(23, 105, 255, .12); }
-      .project strong { display: block; margin-bottom: 14px; font-size: 18px; }
-      .project span { color: #1769ff; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>隆昌集体研学线上化改造</h1>
-      <p>请选择要查看的原型端。后台端与家长端分别部署在独立目录下。</p>
-      <section class="grid" aria-label="项目列表">
-        <a class="project" href="./admin/"><strong>后台端原型</strong><span>/admin/</span></a>
-        <a class="project" href="./student/"><strong>家长端原型</strong><span>/student/</span></a>
-      </section>
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>隆昌集体研学线上化改造 - 原型导航</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .container { max-width: 800px; width: 100%; }
+    h1 { color: white; text-align: center; font-size: 2rem; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .subtitle { color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 3rem; font-size: 1rem; }
+    .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .project { background: white; border-radius: 12px; padding: 2rem; text-decoration: none; color: inherit; display: block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+    .project:hover { transform: translateY(-4px); box-shadow: 0 8px 12px rgba(0,0,0,0.15); }
+    .project strong { display: block; font-size: 1.25rem; color: #667eea; margin-bottom: 0.5rem; }
+    .project span { display: block; color: #6b7280; font-size: 0.875rem; margin-bottom: 0.75rem; font-family: "Courier New", monospace; }
+    .project p { color: #4b5563; line-height: 1.6; font-size: 0.95rem; }
+    footer { text-align: center; margin-top: 3rem; color: rgba(255,255,255,0.8); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>隆昌集体研学线上化改造</h1>
+    <p class="subtitle">Longchang Group Study Online Transformation</p>
+    <div class="projects">
+      <a class="project" href="./admin/">
+        <strong>后台端原型</strong>
+        <span>/admin/</span>
+        <p>智慧研学基地端、学校端、机构端三端统一后台，支持活动创建、分组排寝、用车配置、跟队老师管理等完整流程。</p>
+      </a>
+      <a class="project" href="./student/">
+        <strong>家长端原型</strong>
+        <span>/student/</span>
+        <p>家长端移动端界面，支持活动浏览、报名、支付、行程查看、相册预览等功能。</p>
+      </a>
+    </div>
+    <footer>最后更新：用车配置数据隔离（每个活动独立配置）</footer>
+  </div>
+</body>
 </html>
