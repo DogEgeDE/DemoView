@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中小学素质教育综合管理平台 - SSO 对接原型</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+    
+    /* 登录页面样式 */
+    .login-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #dbeafe 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;  
+    }
+    .login-page::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -200px;
+      left: -200px;
+    }
+    .login-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      width: 90%;
+      max-width: 540px;
+      padding: 48px 50px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 32px;
+      color: #1f2937;
+    }
+    .login-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .login-tab {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    .login-tab.active {
+      background: #2563eb;
+      color: white;
+    }
+    .login-tab.switchable {
+      cursor: pointer;
+    }
+    .login-tab.switchable:hover {
+      background: rgba(37, 99, 235, 0.1);
+    }
+    .identity-hint {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .login-btn:hover {
+      background: #1d4ed8;
+    }
+    .sso-divider {
+      text-align: center;
+      margin: 24px 0;
+      position: relative;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+    .sso-divider::before,
+    .sso-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .sso-divider::before { left: 0; }
+    .sso-divider::after { right: 0; }
+    .sso-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sso-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    .sso-btn:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+      background: #eff6ff;
+    }
+    .sso-btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    /* 工作台布局 */
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 200px;
+      background: #1e293b;
+      color: white;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .identity-switcher {
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 0 12px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .identity-switcher:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .identity-current {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .identity-label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .identity-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 12px;
+      right: 12px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      margin-top: 8px;
+      overflow: hidden;
+      z-index: 1000;
+    }
+    .identity-option {
+      padding: 12px 16px;
+      color: #1f2937;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .identity-option:last-child {
+      border-bottom: none;
+    }
+    .identity-option:hover {
+      background: #f3f4f6;
+    }
+    .identity-option.active {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 500;
+    }
+    .sidebar-menu {
+      list-style: none;
+    }
+    .sidebar-menu li {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 14px;
+    }
+    .sidebar-menu li:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .sidebar-menu li.active {
+      background: #2563eb;
+    }
+    .main-content {
+      margin-left: 200px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .top-header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .province-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #2563eb;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .province-link:hover {
+      color: #1d4ed8;
+    }
+    .role-badge {
+      padding: 6px 16px;
+      background: #eff6ff;
+      color: #2563eb;
+      border-radius: 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      position: relative;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      min-width: 160px;
+      display: none;
+      z-index: 1000;
+    }
+    .dropdown-menu.show {
+      display: block;
+    }
+    .dropdown-menu a {
+      display: block;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #4b5563;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .dropdown-menu a:hover {
+      background: #f9fafb;
+    }
+    .content-area {
+      padding: 32px;
+      flex: 1;
+    }
+    
+    /* 数据看板 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .stat-card.orange { border-left: 4px solid #f97316; }
+    .stat-card.blue { border-left: 4px solid #2563eb; }
+    .stat-card.cyan { border-left: 4px solid #06b6d4; }
+    .stat-card.green { border-left: 4px solid #10b981; }
+    .stat-label {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    
+    /* 个人中心 */
+    .profile-container {
+      display: flex;
+      gap: 24px;
+    }
+    .profile-sidebar {
+      width: 200px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      height: fit-content;
+    }
+    .profile-menu {
+      list-style: none;
+    }
+    .profile-menu li {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+    }
+    .profile-menu li:hover {
+      background: #f9fafb;
+    }
+    .profile-menu li.active {
+      color: #2563eb;
+      background: #eff6ff;
+      border-left-color: #2563eb;
+    }
+    .profile-content {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .profile-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .binding-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .binding-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .binding-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    .binding-status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .binding-status.bound {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .binding-status.unbound {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .binding-info {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+    .binding-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      padding: 8px 20px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    .btn-secondary {
+      background: white;
+      color: #6b7280;
+      border: 1px solid #d1d5db;
+    }
+    .btn-secondary:hover {
+      background: #f9fafb;
+    }
+    
+    /* 外部绑定页面模拟 */
+    .external-page {
+      min-height: 100vh;
+      background: #f5f7fa;
+      padding: 40px 20px;
+    }
+    .browser-bar {
+      background: #e5e7eb;
+      padding: 8px 16px;
+      border-radius: 8px 8px 0 0;
+      font-size: 12px;
+      color: #6b7280;
+      font-family: monospace;
+      margin-bottom: 0;
+    }
+    .external-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+    }
+    .external-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .external-logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    .external-logo-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border-radius: 16px;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+    .auth-info {
+      background: #eff6ff;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #1e40af;
+    }
+    .form-field {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    /* 阻断页面 */
+    .blocked-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f7fa;
+    }
+    .blocked-container {
+      text-align: center;
+      max-width: 480px;
+      background: white;
+      padding: 48px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+    .blocked-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: #fee2e2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .blocked-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #dc2626;
+      margin-bottom: 16px;
+    }
+    .blocked-message {
+      font-size: 15px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    
+    /* 引导页面 */
+    .guide-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f7fa;
+    }
+    .guide-container {
+      text-align: center;
+      max-width: 480px;
+      background: white;
+      padding: 48px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+    .guide-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: white;
+    }
+    .guide-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 16px;
+    }
+    .guide-message {
+      font-size: 15px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    
+    /* 绑定确认弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1f2937;
+    }
+    .modal-body {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    /* 绑定标签页 */
+    .bind-tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .bind-tab:hover {
+      background: #e5e7eb;
+    }
+    .bind-tab.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+    .bind-mode-panel {
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 演示控制台 */
+    .demo-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      z-index: 10000;
+      width: 300px;
+    }
+    .demo-control-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1f2937;
+    }
+    .demo-control select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .demo-control-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .hidden { display: none !important; }
+
+    /* 业务规则面板样式 */
+    .rule-panel {
+      position: fixed;
+      right: 80px;
+      top: 24px;
+      width: 320px;
+      max-height: 80vh;
+      background: #fffbeb;
+      border: 3px solid #fbbf24;
+      border-radius: 12px;
+      padding: 0;
+      overflow: hidden;
+      z-index: 998;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      cursor: move;
+    }
+
+    .rule-panel.collapsed {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .rule-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: #fef3c7;
+      border-bottom: 2px solid #fbbf24;
+      cursor: move;
+      user-select: none;
+    }
+
+    .rule-panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rule-panel-close {
+      width: 28px;
+      height: 28px;
+      background: #fef3c7;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .rule-panel-close:hover {
+      background: #fde68a;
+    }
+
+    .rule-panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      max-height: calc(80vh - 60px);
+    }
+
+    .rule-item {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #fff;
+      border-radius: 8px;
+      border-left: 3px solid #fbbf24;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .rule-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+
+    .rule-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+
+    .rule-item-content {
+      font-size: 12px;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+
+    .rule-toggle-btn {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      background: #fbbf24;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+      font-size: 20px;
+      z-index: 999;
+      transition: transform 0.2s;
+    }
+
+    .rule-toggle-btn:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 登录页面 -->
+  <div id="loginPage" class="login-page">
+    <div class="login-container">
+      <h1 class="login-title">中小学素质教育综合管理平台</h1>
+      <div class="login-tabs">
+        <button class="login-tab active" onclick="switchLoginIdentity(this, '教育局')">教育局</button>
+        <button class="login-tab" onclick="switchLoginIdentity(this, '学校')">学校</button>
+        <button class="login-tab">基地</button>
+        <button class="login-tab">机构</button>
+        <button class="login-tab">其他组织</button>
+      </div>
+      <div class="identity-hint">当前选择:<span id="selectedIdentity" style="color: #2563eb; font-weight: 500; margin-left: 8px;">教育局</span></div>
+      <form class="login-form" onsubmit="event.preventDefault(); loginWithPassword();">
+        <div class="form-group">
+          <input type="text" placeholder="请输入手机号" />
+        </div>
+        <div class="form-group">
+          <input type="password" placeholder="请输入密码" />
+        </div>
+        <button type="submit" class="login-btn">登录</button>
+      </form>
+      <div class="sso-divider">或</div>
+      <div class="sso-buttons">
+        <button class="sso-btn" onclick="goToNationalRegister()">
+          <svg class="sso-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          国家智教通行证
+        </button>
+        <button class="sso-btn" onclick="goToProvincePlatformLogin()">
+          <svg class="sso-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
+          </svg>
+          河南中小学智慧教育平台
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 工作台页面 -->
+  <div id="dashboardPage" class="dashboard-layout hidden">
+    <aside class="sidebar">
+      <div class="sidebar-logo">北京市</div>
+      <ul class="sidebar-menu">
+        <li class="active">数据看板</li>
+        <li>资源管理</li>
+        <li>课程管理</li>
+        <li>综合评价</li>
+        <li>活动管理</li>
+        <li>账号管理</li>
+        <li>作业中心管理</li>
+        <li>综合管理</li>
+        <li>技术系统管理</li>
+        <li>行政审批</li>
+        <li>研学管理</li>
+        <li>成绩管理</li>
+        <li>学籍管理</li>
+        <li>校音校视</li>
+        <li>系统日志</li>
+      </ul>
+    </aside>
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-left">数据看板</div>
+        <div class="header-right">
+          <a href="#" class="province-link" onclick="jumpToNationalPlatform(); return false;">
+            <svg style="width: 16px; height: 16px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            国家教育资源公共服务平台
+          </a>
+          <a href="#" class="province-link" onclick="jumpToProvincePlatform(); return false;">
+            <svg style="width: 16px; height: 16px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            河南中小学智慧教育平台
+          </a>
+          <span class="role-badge" onclick="alert('已绑定省平台账号：138****2119')">教育局</span>
+          <div class="user-avatar" onclick="toggleUserDropdown()">
+            杨
+            <div id="userDropdown" class="dropdown-menu">
+              <a href="#" onclick="showPage('profilePage'); return false;">个人中心</a>
+              <a href="#" onclick="alert('研学工作台'); return false;">研学工作台</a>
+              <a href="#" onclick="showPage('loginPage'); return false;">退出登录</a>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="content-area">
+        <div class="stats-grid">
+          <div class="stat-card orange">
+            <div class="stat-label">学生</div>
+            <div class="stat-value">0</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-label">活动数</div>
+            <div class="stat-value">1</div>
+          </div>
+          <div class="stat-card cyan">
+            <div class="stat-label">学校数</div>
+            <div class="stat-value">0</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">学生数</div>
+            <div class="stat-value">1</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 个人中心页面 -->
+  <div id="profilePage" class="dashboard-layout hidden">
+    <aside class="sidebar">
+      <div class="sidebar-logo">北京市</div>
+      <div class="identity-switcher" onclick="toggleIdentityDropdown(event)" style="position: relative;">
+        <div class="identity-label">当前身份</div>
+        <div class="identity-current">
+          <span id="currentIdentityProfile">教育局端</span>
+          <span>▼</span>
+        </div>
+        <div id="identityDropdownProfile" class="identity-dropdown hidden">
+          <div class="identity-option active" onclick="switchIdentity('教育局端', true)">教育局端</div>
+          <div class="identity-option" onclick="switchIdentity('学校端', true)">学校端</div>
+        </div>
+      </div>
+      <ul class="sidebar-menu">
+        <li onclick="showPage('dashboardPage')">数据看板</li>
+        <li>资源管理</li>
+        <li>课程管理</li>
+        <li>综合评价</li>
+      </ul>
+    </aside>
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-left">个人中心</div>
+        <div class="header-right">
+          <span class="role-badge">教育局</span>
+          <div class="user-avatar" onclick="toggleUserDropdown()">
+            杨
+            <div id="userDropdown2" class="dropdown-menu">
+              <a href="#" onclick="showPage('profilePage'); return false;">个人中心</a>
+              <a href="#" onclick="showPage('loginPage'); return false;">退出登录</a>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="content-area">
+        <div class="profile-container">
+          <aside class="profile-sidebar">
+            <ul class="profile-menu">
+              <li class="active" onclick="showProfileTab('basic')">基础信息</li>
+              <li onclick="showProfileTab('password')">修改密码</li>
+            </ul>
+          </aside>
+          <div class="profile-content">
+            <div id="basicTab">
+              <h2 class="profile-section-title">基础信息</h2>
+              <div class="binding-info">
+                <p><strong>姓名：</strong>杨晓晓</p>
+                <p><strong>手机号：</strong>158****2119</p>
+                <p><strong>性别：</strong>女性</p>
+              </div>
+            </div>
+            <div id="passwordTab" class="hidden">
+              <h2 class="profile-section-title">修改密码</h2>
+              <form class="login-form" style="max-width: 400px;">
+                <div class="form-group">
+                  <input type="password" placeholder="原密码" />
+                </div>
+                <div class="form-group">
+                  <input type="password" placeholder="新密码" />
+                </div>
+                <div class="form-group">
+                  <input type="password" placeholder="确认新密码" />
+                </div>
+                <button type="submit" class="btn btn-primary">保存</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 国家平台绑定页面 -->
+  <div id="nationalBindingPage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://www.smartedu.cn/oauth/authorize?client_id=xxx&redirect_uri=xxx（演示用地址）</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">国家中小学智慧教育平台</div>
+        <span class="external-logo-badge">智教中国通行证</span>
+      </div>
+      <div class="auth-info">
+        📱 应用"中小学素质教育综合管理平台"请求绑定您的国家平台账号
+      </div>
+      <form onsubmit="event.preventDefault(); completeNationalBinding();">
+        <div class="form-field">
+          <label class="form-label">手机号</label>
+          <input class="form-input" type="tel" placeholder="请输入手机号" value="13812342119" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">验证码</label>
+          <input class="form-input" type="text" placeholder="请输入验证码" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">授权并绑定</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="showPage('profilePage')">取消</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 省平台绑定页面 -->
+  <div id="provinceBindingPage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://basic.haedu.cn/open/auth?appid=xxx&redirect_uri=xxx（演示用地址）</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">河南中小学智慧教育平台</div>
+        <span class="external-logo-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">河南省教育厅</span>
+      </div>
+      <div class="auth-info">
+        📱 应用"中小学素质教育综合管理平台"请求绑定您的省平台账号
+      </div>
+      <form onsubmit="event.preventDefault(); completeProvinceBinding();">
+        <div class="form-field">
+          <label class="form-label">手机号</label>
+          <input class="form-input" type="tel" placeholder="请输入手机号" value="13812342119" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">密码</label>
+          <input class="form-input" type="password" placeholder="请输入密码" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">授权并绑定</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="showPage('profilePage')">取消</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 阻断页面 -->
+  <div id="blockedPage" class="blocked-page hidden">
+    <div class="blocked-container">
+      <div class="blocked-icon">🚫</div>
+      <h2 class="blocked-title">操作失败</h2>
+      <p class="blocked-message">
+        该手机号不存在，请联系管理员开通账户
+      </p>
+      <button class="btn btn-primary" onclick="showPage('loginPage')">返回登录</button>
+    </div>
+  </div>
+
+  <!-- 引导页面 -->
+  <div id="guidePage" class="guide-page hidden">
+    <div class="guide-container">
+      <div class="guide-icon">→</div>
+      <h2 class="guide-title">即将进入学校端</h2>
+      <p class="guide-message">
+        您的省平台账号未绑定教育局端账号，但已绑定学校端账号。<br><br>
+        系统将引导您进入学校端工作台。
+      </p>
+      <button class="btn btn-primary" onclick="showPage('dashboardPage')">进入学校端</button>
+    </div>
+  </div>
+
+  <!-- 省平台免登跳转页面 -->
+  <!-- 省平台登录页面 -->
+  <div id="provincePlatformLoginPage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://basic.henan.smartedu.cn (演示用地址)</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">河南中小学智慧教育平台</div>
+        <span class="external-logo-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">河南省教育厅</span>
+      </div>
+      <div class="auth-info">
+        🔐 请使用国家智教通行证登录
+      </div>
+      <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="loginWithProvinceSSO()">
+        <svg style="width: 18px; height: 18px; margin-right: 8px; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        国家智教通行证登录
+      </button>
+      <div style="background: #eff6ff; padding: 16px; border-radius: 8px; font-size: 13px; color: #1e40af; margin-bottom: 16px; line-height: 1.6;">
+        💡 登录后可访问河南省内各地市教育平台
+      </div>
+      <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; margin-top: 16px;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 12px;">地方频道</h3>
+        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="jumpToLocalPlatform()">
+          <svg style="width: 16px; height: 16px; margin-right: 6px; display: inline-block; vertical-align: middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+          驻马店市智慧教育平台
+        </button>
+      </div>
+      <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="showPage('loginPage')">返回本地平台</button>
+    </div>
+  </div>
+
+  <!-- 注册引导页面 -->
+  <div id="registerGuidePage" class="external-page hidden">
+    <div class="browser-bar">🌐 本地平台 - 注册引导</div>
+    <div class="external-container">
+      <div class="guide-container">
+        <div class="guide-icon">📝</div>
+        <h2 class="guide-title">账号注册说明</h2>
+        <div class="guide-message" style="text-align: left;">
+          <p style="margin-bottom: 12px;">为了给您提供更好的服务，本平台账号需要通过以下方式创建：</p>
+          <div style="background: #eff6ff; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+            <p style="color: #1e40af; font-weight: 500; margin-bottom: 8px;">✨ 推荐方式：通过国家智教通行证注册</p>
+            <p style="color: #6b7280; font-size: 13px; line-height: 1.6;">
+              1. 前往国家智慧教育平台完成通行证注册<br>
+              2. 返回本平台使用通行证登录<br>
+              3. 系统自动完成账号绑定和创建
+            </p>
+          </div>
+          <div style="background: #fef3c7; padding: 16px; border-radius: 8px;">
+            <p style="color: #92400e; font-weight: 500; margin-bottom: 8px;">⚠️ 注意事项</p>
+            <p style="color: #78350f; font-size: 13px; line-height: 1.6;">
+              • 本平台不支持用户自主注册<br>
+              • 注册时请确保您已加入所属组织（学校/教育局等）<br>
+              • 无组织归属将无法正常使用平台功能
+            </p>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="goToNationalRegister()">前往国家平台注册</button>
+        <button class="btn btn-secondary" style="width: 100%;" onclick="showPage('loginPage')">返回登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 国家平台注册页面 -->
+  <div id="nationalRegisterPage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://www.smartedu.cn/register (演示用地址)</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">国家智慧教育公共服务平台</div>
+        <span class="external-logo-badge">账号注册</span>
+      </div>
+      <form onsubmit="event.preventDefault(); completeNationalRegister();" style="max-width: 420px; margin: 0 auto;">
+        <div class="form-field">
+          <label class="form-label">姓名</label>
+          <input class="form-input" type="text" placeholder="请输入真实姓名" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">身份证号</label>
+          <input class="form-input" type="text" placeholder="请输入身份证号" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">手机号</label>
+          <input class="form-input" type="tel" placeholder="请输入手机号" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">短信验证码</label>
+          <div style="display: flex; gap: 8px;">
+            <input class="form-input" type="text" placeholder="请输入验证码" style="flex: 1;" />
+            <button type="button" class="btn btn-secondary" style="white-space: nowrap;">获取验证码</button>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">设置密码</label>
+          <input class="form-input" type="password" placeholder="请设置登录密码" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">所属组织</label>
+          <input class="form-input" type="text" placeholder="请输入学校或单位名称" />
+        </div>
+        <div style="background: #eff6ff; padding: 12px; border-radius: 8px; font-size: 13px; color: #1e40af; margin-bottom: 16px;">
+          💡 注册完成后可直接使用通行证登录地方平台
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">完成注册</button>
+      </form>
+      <button class="btn btn-secondary" style="width: 100%; margin-top: 16px;" onclick="showPage('registerGuidePage')">返回</button>
+    </div>
+  </div>
+
+  <!-- 省平台免登跳转成功页面 -->
+  <div id="provinceJumpPage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://basic.henan.smartedu.cn/sso/login?ticket=xxx(演示用地址)</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">河南中小学智慧教育平台</div>
+        <span class="external-logo-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">河南省教育厅</span>
+      </div>
+      <div style="text-align: center; padding: 40px 0;">
+        <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+        <h2 style="font-size: 20px; color: #1f2937; margin-bottom: 12px;">免登成功</h2>
+        <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+          已通过本地 loginToken 置换 ticket 完成免登<br>
+          正在跳转至河南省平台...
+        </p>
+      </div>
+      <button class="btn btn-secondary" style="width: 100%;" onclick="showPage('dashboardPage')">返回我方平台</button>
+    </div>
+  </div>
+
+  <!-- 跳转过渡遮罩 -->
+  <div id="jumpOverlay" class="hidden" style="position: fixed; inset: 0; background: rgba(255,255,255,0.92); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+    <div style="width: 40px; height: 40px; border: 4px solid #dbeafe; border-top-color: #2563eb; border-radius: 50%; animation: jumpSpin 0.8s linear infinite;"></div>
+    <div id="jumpOverlayText" style="font-size: 15px; color: #374151;"></div>
+  </div>
+  <style>@keyframes jumpSpin { to { transform: rotate(360deg); } }</style>
+
+  <!-- 国家平台跳转页面 -->
+  <div id="nationalJumpPage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://www.smartedu.cn(演示用地址)</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">国家教育资源公共服务平台</div>
+        <span class="external-logo-badge">教育部</span>
+      </div>
+      <div style="text-align: center; padding: 40px 0;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🌐</div>
+        <h2 style="font-size: 20px; color: #1f2937; margin-bottom: 12px;">已跳转至国家平台</h2>
+        <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+          正在访问国家教育资源公共服务平台...
+        </p>
+      </div>
+      <button class="btn btn-secondary" style="width: 100%;" onclick="showPage('dashboardPage')">返回我方平台</button>
+    </div>
+  </div>
+
+  <!-- 省平台绑定引导页面 -->
+  <div id="provinceBindGuidePage" class="external-page hidden">
+    <div class="browser-bar">🌐 https://basic.henan.smartedu.cn/manage/account/frontend/link/sds/to-bind?service=xxx&client_id=xxx&data=xxx(演示用地址)</div>
+    <div class="external-container">
+      <div class="external-logo">
+        <div class="external-logo-text">河南中小学智慧教育平台</div>
+        <span class="external-logo-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">账号绑定</span>
+      </div>
+      <div class="auth-info">
+        📱 检测到您尚未绑定省平台账号,请选择绑定方式
+      </div>
+      
+      <!-- 绑定方式选择 -->
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button class="bind-tab active" onclick="switchBindMode('auto')">自动匹配</button>
+          <button class="bind-tab" onclick="switchBindMode('account')">账号密码绑定</button>
+          <button class="bind-tab" onclick="switchBindMode('register')">创建新账号</button>
+        </div>
+        
+        <!-- 自动匹配模式 -->
+        <div id="bindModeAuto" class="bind-mode-panel">
+          <div style="background: #eff6ff; padding: 16px; border-radius: 8px; font-size: 13px; color: #1e40af; margin-bottom: 16px; line-height: 1.6;">
+            💡 <strong>系统已自动匹配到您的本地账号</strong><br>
+            手机号:138****2119<br>
+            姓名:杨晓晓<br>
+            所属组织:驻马店市教育局
+          </div>
+          <form onsubmit="event.preventDefault(); completeProvinceJumpBinding('auto');">
+            <div class="form-field">
+              <label class="form-label">验证手机号</label>
+              <input class="form-input" type="tel" placeholder="请输入完整手机号验证" value="" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">短信验证码</label>
+              <div style="display: flex; gap: 8px;">
+                <input class="form-input" type="text" placeholder="请输入验证码" style="flex: 1;" />
+                <button type="button" class="btn btn-secondary" style="white-space: nowrap;">获取验证码</button>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">确认绑定</button>
+          </form>
+        </div>
+        
+        <!-- 账号密码绑定模式 -->
+        <div id="bindModeAccount" class="bind-mode-panel hidden">
+          <div style="background: #fef3c7; padding: 16px; border-radius: 8px; font-size: 13px; color: #92400e; margin-bottom: 16px; line-height: 1.6;">
+            ⚠️ 如果您已有本地平台账号，可通过账号密码验证完成绑定
+          </div>
+          <form onsubmit="event.preventDefault(); completeProvinceJumpBinding('account');">
+            <div class="form-field">
+              <label class="form-label">本地平台账号</label>
+              <input class="form-input" type="text" placeholder="请输入账号（手机号/工号）" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">密码</label>
+              <input class="form-input" type="password" placeholder="请输入密码" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">验证并绑定</button>
+          </form>
+        </div>
+        
+        <!-- 创建新账号模式 -->
+        <div id="bindModeRegister" class="bind-mode-panel hidden">
+          <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; font-size: 13px; color: #166534; margin-bottom: 16px; line-height: 1.6;">
+            ✨ 使用省平台账号信息创建本地账号并完成绑定
+          </div>
+          <form onsubmit="event.preventDefault(); completeProvinceJumpBinding('register');">
+            <div class="form-field">
+              <label class="form-label">姓名</label>
+              <input class="form-input" type="text" placeholder="请输入姓名" value="杨晓晓" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">手机号</label>
+              <input class="form-input" type="tel" placeholder="请输入手机号" value="13812342119" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">所属组织</label>
+              <select class="form-input">
+                <option value="">请选择所属组织</option>
+                <option value="edu">驻马店市教育局</option>
+                <option value="school1">驻马店市第一中学</option>
+                <option value="school2">驻马店市第二中学</option>
+              </select>
+            </div>
+            <div style="background: #fef3c7; padding: 12px; border-radius: 8px; font-size: 12px; color: #92400e; margin-bottom: 8px;">
+              ⚠️ 创建账号后需等待管理员审核通过
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">创建账号并绑定</button>
+          </form>
+        </div>
+      </div>
+      
+      <button class="btn btn-secondary" style="width: 100%;" onclick="showPage('loginPage')">取消</button>
+    </div>
+  </div>
+
+  <!-- 演示控制台 -->
+  <button id="demoToggleBtn" class="demo-control-toggle" onclick="toggleDemoControl()">⚙️</button>
+  <div id="demoControl" class="demo-control">
+    <div class="demo-control-title">演示控制台</div>
+    <label style="font-size: 12px; color: #6b7280; display: block; margin-bottom: 4px;">账号状态场景：</label>
+    <select id="ssoScenario" onchange="updateScenario()">
+      <option value="bound-bureau">已绑定-教育局端</option>
+      <option value="bound-school">已绑定-学校端</option>
+      <option value="unbound-matched">未绑定-匹配到账号</option>
+      <option value="unbound-no-account">未绑定-无本地账号</option>
+    </select>
+    <button class="btn btn-secondary" style="width: 100%; margin-top: 12px; font-size: 12px;" onclick="resetDemo()">重置演示</button>
+  </div>
+
+  <!-- 业务规则面板 -->
+  <button class="rule-toggle-btn" onclick="toggleRulePanel()">📋</button>
+  <div id="rulePanel" class="rule-panel collapsed">
+    <div class="rule-panel-header">
+      <div class="rule-panel-title">
+        <span>📋</span>
+        <span>业务规则说明</span>
+      </div>
+      <button class="rule-panel-close" onclick="toggleRulePanel()">×</button>
+    </div>
+    <div class="rule-panel-body">
+      <div class="rule-item">
+        <div class="rule-tag">身份验证</div>
+        <div class="rule-item-title">登录身份匹配规则</div>
+        <div class="rule-item-content">
+          本地账号密码登录时，选择的身份必须与账号所属端匹配。教育局端账号只能选择"教育局"身份登录，学校端账号只能选择"学校"身份登录。身份不匹配时提示"该手机号不存在"。
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-tag">账号绑定</div>
+        <div class="rule-item-title">未绑定账号处理规则</div>
+        <div class="rule-item-content">
+          当本地账号存在但未绑定省平台账号时（未绑定-匹配到账号场景），无论通过本地登录还是SSO登录，都需要先跳转到省平台完成账号绑定，绑定成功后才能正常登录系统。
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-tag">账号阻断</div>
+        <div class="rule-item-title">无本地账号阻断规则</div>
+        <div class="rule-item-content">
+          当用户手机号在本地系统中不存在时（未绑定-无本地账号场景），显示"操作失败：该手机号不存在，请联系管理员开通账户"，阻止用户登录。不支持用户自主注册。
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-tag">SSO登录</div>
+        <div class="rule-item-title">单点登录流程</div>
+        <div class="rule-item-content">
+          支持两种SSO登录方式：<br>
+          1. 国家智教通行证：跳转国家平台注册页面<br>
+          2. 河南省平台：跳转省平台登录页，通过国家智教通行证登录后，可访问地方频道进入本系统
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-tag">省平台绑定</div>
+        <div class="rule-item-title">省平台绑定方式</div>
+        <div class="rule-item-content">
+          省平台绑定页面提供三种绑定方式：<br>
+          1. 自动匹配：系统已匹配到本地账号，通过手机号验证即可绑定<br>
+          2. 账号密码绑定：使用本地平台账号密码验证后绑定<br>
+          3. 创建新账号：使用省平台信息创建本地账号（需管理员审核）
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-tag">数据隔离</div>
+        <div class="rule-item-title">多端数据隔离规则</div>
+        <div class="rule-item-content">
+          教育局端和学校端账号体系相互独立。同一个省平台账号可以同时绑定教育局端账号和学校端账号，但两端数据和权限互不影响。
+        </div>
+      </div>
+      
+      <div class="rule-item">
+        <div class="rule-tag">演示控制</div>
+        <div class="rule-item-title">演示场景说明</div>
+        <div class="rule-item-content">
+          本原型通过右下角演示控制台模拟四种账号状态：<br>
+          • 已绑定-教育局端：可直接登录教育局工作台<br>
+          • 已绑定-学校端：可直接登录学校工作台<br>
+          • 未绑定-匹配到账号：引导到省平台完成绑定<br>
+          • 未绑定-无本地账号：显示阻断提示
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局状态
+    let currentScenario = 'bound-bureau';
+    let nationalBound = false;
+    let provinceBound = false;
+    let currentIdentity = '教育局端'; // 当前身份
+
+    // 全局变量：记录当前登录选择的身份
+    let selectedLoginIdentity = '教育局';
+
+    // 页面切换
+    function showPage(pageId) {
+      ['loginPage', 'dashboardPage', 'profilePage', 'nationalBindingPage', 'provinceBindingPage', 'blockedPage', 'guidePage', 'provinceJumpPage', 'provinceBindGuidePage', 'registerGuidePage', 'nationalRegisterPage', 'provincePlatformLoginPage', 'nationalJumpPage'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(pageId).classList.remove('hidden');
+    }
+
+    // 登录页面身份切换
+    function switchLoginIdentity(button, identity) {
+      selectedLoginIdentity = identity;
+      
+      // 移除所有教育局和学校标签的 active 状态
+      const tabs = document.querySelectorAll('.login-tab');
+      tabs.forEach(tab => {
+        if (tab.textContent === '教育局' || tab.textContent === '学校') {
+          tab.classList.remove('active');
+        }
+      });
+      
+      // 激活当前选中的标签
+      button.classList.add('active');
+      
+      // 更新身份提示
+      document.getElementById('selectedIdentity').textContent = identity;
+    }
+
+    // 身份切换
+    function toggleIdentityDropdown(event) {
+      event.stopPropagation();
+      const dropdown = event.currentTarget.querySelector('.identity-dropdown');
+      dropdown.classList.toggle('hidden');
+    }
+
+    function switchIdentity(identity, isProfile = false) {
+      currentIdentity = identity;
+      
+      // 更新工作台页面的身份显示
+      const identityEl = document.getElementById('currentIdentity');
+      if (identityEl) identityEl.textContent = identity;
+      
+      // 更新个人中心页面的身份显示
+      const identityProfileEl = document.getElementById('currentIdentityProfile');
+      if (identityProfileEl) identityProfileEl.textContent = identity;
+      
+      // 更新下拉选项的激活状态
+      updateIdentityOptions(identity);
+      
+      // 关闭下拉菜单
+      document.querySelectorAll('.identity-dropdown').forEach(el => el.classList.add('hidden'));
+      
+      // 提示切换成功
+      alert(`已切换至：${identity}`);
+    }
+
+    function updateIdentityOptions(identity) {
+      document.querySelectorAll('.identity-option').forEach(option => {
+        if (option.textContent === identity) {
+          option.classList.add('active');
+        } else {
+          option.classList.remove('active');
+        }
+      });
+    }
+
+    // 点击其他地方关闭下拉菜单
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.identity-dropdown').forEach(el => el.classList.add('hidden'));
+    });
+
+    // 个人中心标签切换
+    function showProfileTab(tab) {
+      document.querySelectorAll('.profile-menu li').forEach(li => li.classList.remove('active'));
+      event.target.classList.add('active');
+      ['basicTab', 'bindingTab', 'passwordTab'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(tab + 'Tab').classList.remove('hidden');
+    }
+
+    // 用户下拉菜单
+    function toggleUserDropdown() {
+      const dropdown = event.target.querySelector('.dropdown-menu') || event.target.parentElement.querySelector('.dropdown-menu');
+      dropdown.classList.toggle('show');
+    }
+
+    // 演示控制台
+    function toggleDemoControl() {
+      document.getElementById('demoControl').classList.toggle('hidden');
+      document.getElementById('demoToggleBtn').style.display = 
+        document.getElementById('demoControl').classList.contains('hidden') ? 'flex' : 'none';
+    }
+
+    // 业务规则面板控制
+    function toggleRulePanel() {
+      document.getElementById('rulePanel').classList.toggle('collapsed');
+    }
+
+    // 业务规则面板拖拽功能
+    (function() {
+      let isDragging = false;
+      let currentX;
+      let currentY;
+      let initialX;
+      let initialY;
+      let xOffset = 0;
+      let yOffset = 0;
+
+      const dragElement = document.getElementById('rulePanel');
+      const dragHeader = dragElement.querySelector('.rule-panel-header');
+
+      dragHeader.addEventListener('mousedown', dragStart);
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', dragEnd);
+
+      function dragStart(e) {
+        if (e.target.classList.contains('rule-panel-close')) {
+          return;
+        }
+        
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+
+        if (e.target === dragHeader || dragHeader.contains(e.target)) {
+          isDragging = true;
+        }
+      }
+
+      function drag(e) {
+        if (isDragging) {
+          e.preventDefault();
+          
+          currentX = e.clientX - initialX;
+          currentY = e.clientY - initialY;
+
+          xOffset = currentX;
+          yOffset = currentY;
+
+          setTranslate(currentX, currentY, dragElement);
+        }
+      }
+
+      function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+      }
+
+      function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+      }
+    })();
+
+    function updateScenario() {
+      currentScenario = document.getElementById('ssoScenario').value;
+    }
+
+    function resetDemo() {
+      currentScenario = 'bound-bureau';
+      nationalBound = false;
+      provinceBound = false;
+      document.getElementById('ssoScenario').value = 'bound-bureau';
+      showPage('loginPage');
+      alert('演示已重置，已返回登录页面');
+    }
+
+    // 注册流程
+    function goToNationalRegister() {
+      alert('即将跳转至国家智慧教育平台完成注册');
+      setTimeout(() => {
+        showPage('nationalRegisterPage');
+      }, 500);
+    }
+
+    function completeNationalRegister() {
+      alert('✅ 注册成功\n\n您已成功注册国家智教通行证\n现在可以返回登录页面使用通行证登录');
+      setTimeout(() => {
+        showPage('loginPage');
+      }, 800);
+    }
+
+    // 跳转到省平台登录
+    function goToProvincePlatformLogin() {
+      alert('即将跳转至河南中小学智慧教育平台');
+      setTimeout(() => {
+        showPage('provincePlatformLoginPage');
+      }, 500);
+    }
+
+    // 从省平台跳转到本地平台
+    function jumpToLocalPlatform() {
+      alert('✅ 省平台已登录\n📋 携带 ticket 跳转至驻马店市智慧教育平台\n\n开始验证用户身份...');
+      setTimeout(() => {
+        // 模拟根据场景处理
+        const scenario = document.getElementById('ssoScenario').value;
+        simulateSSOFlow('province');
+      }, 800);
+    }
+
+    // 登录流程
+    function loginWithPassword() {
+      const phone = document.querySelector('input[placeholder="请输入手机号"]').value;
+      const password = document.querySelector('input[placeholder="请输入密码"]').value;
+      
+      if (!phone || !password) {
+        alert('请输入手机号和密码');
+        return;
+      }
+      
+      // 根据演示场景判断登录结果
+      const scenario = document.getElementById('ssoScenario').value;
+      
+      if (scenario === 'unbound-no-account') {
+        // 无本地账号场景
+        alert('登录失败：该手机号不存在');
+        showPage('blockedPage');
+        return;
+      }
+      
+      if (scenario === 'unbound-matched') {
+        // 本地账号存在但未绑定省平台账号，需跳转省平台完成绑定
+        alert('您的账号尚未绑定河南省平台账号\n\n即将跳转至河南中小学智慧教育平台完成账号绑定');
+        showPage('provinceBindGuidePage');
+        return;
+      }
+      
+      // 验证角色是否匹配
+      if (scenario === 'bound-bureau' && selectedLoginIdentity !== '教育局') {
+        // 场景是教育局端，但选择的不是教育局身份
+        alert('操作失败：该手机号不存在');
+        showPage('blockedPage');
+        return;
+      }
+      
+      if (scenario === 'bound-school' && selectedLoginIdentity !== '学校') {
+        // 场景是学校端，但选择的不是学校身份
+        alert('操作失败：该手机号不存在');
+        showPage('blockedPage');
+        return;
+      }
+      
+      // 角色匹配，正常登录
+      alert('✅ 登录成功\n进入' + selectedLoginIdentity + '端工作台');
+      showPage('dashboardPage');
+    }
+
+    function loginWithNationalSSO() {
+      simulateSSOFlow('national');
+    }
+
+    function loginWithProvinceSSO() {
+      simulateSSOFlow('province');
+    }
+
+    function simulateSSOFlow(platform) {
+      const scenario = document.getElementById('ssoScenario').value;
+      
+      setTimeout(() => {
+        switch(scenario) {
+          case 'bound-bureau':
+            showPage('dashboardPage');
+            alert(`✅ ${platform === 'national' ? '国家平台' : '省平台'}免登成功\n自动进入教育局端工作台`);
+            break;
+          case 'bound-school':
+            showPage('guidePage');
+            break;
+          case 'unbound-matched':
+            alert(`检测到您的${platform === 'national' ? '国家平台' : '省平台'}账号尚未绑定\n\n系统已匹配到您的本地账号（手机号：138****2119）\n\n即将跳转至${platform === 'national' ? '国家平台' : '省平台'}完成账号绑定`);
+            setTimeout(() => {
+              showPage('provinceBindGuidePage');
+            }, 500);
+            break;
+          case 'unbound-no-account':
+            showPage('blockedPage');
+            break;
+        }
+      }, 800);
+    }
+
+    // 绑定流程
+    function goToNationalBinding() {
+      showPage('nationalBindingPage');
+    }
+
+    function goToProvinceBinding() {
+      showPage('provinceBindingPage');
+    }
+
+    function completeNationalBinding() {
+      nationalBound = true;
+      updateBindingUI();
+      alert('✅ 国家平台账号绑定成功');
+      showPage('profilePage');
+      showProfileTab('binding');
+    }
+
+    function completeProvinceBinding() {
+      provinceBound = true;
+      updateBindingUI();
+      alert('✅ 省平台账号绑定成功');
+      showPage('profilePage');
+      showProfileTab('binding');
+    }
+
+    function unbindNational() {
+      if(confirm('确定要解除国家平台账号绑定吗？')) {
+        nationalBound = false;
+        updateBindingUI();
+        alert('已解除绑定');
+      }
+    }
+
+    function unbindProvince() {
+      if(confirm('确定要解除省平台账号绑定吗？')) {
+        provinceBound = false;
+        updateBindingUI();
+        alert('已解除绑定');
+      }
+    }
+
+    // 双向跳转流程
+    // 方向一：我方平台 → 省平台（用户点击头部导航链接）
+    // 带过渡效果的外部平台跳转
+    function jumpWithLoading(pageId, text) {
+      const overlay = document.getElementById('jumpOverlay');
+      document.getElementById('jumpOverlayText').textContent = text;
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        showPage(pageId);
+      }, 1200);
+    }
+
+    // 已登录用户均为已绑定账号，直接免登跳转省平台
+    function jumpToProvincePlatform() {
+      jumpWithLoading('provinceJumpPage', '正在跳转至河南中小学智慧教育平台...');
+    }
+
+    function jumpToNationalPlatform() {
+      jumpWithLoading('nationalJumpPage', '正在跳转至国家教育资源公共服务平台...');
+    }
+
+    // 省平台绑定完成（从跳转场景）
+    // 切换绑定模式
+    function switchBindMode(mode) {
+      // 切换标签激活状态
+      document.querySelectorAll('.bind-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // 切换面板显示
+      document.getElementById('bindModeAuto').classList.add('hidden');
+      document.getElementById('bindModeAccount').classList.add('hidden');
+      document.getElementById('bindModeRegister').classList.add('hidden');
+      
+      if(mode === 'auto') {
+        document.getElementById('bindModeAuto').classList.remove('hidden');
+      } else if(mode === 'account') {
+        document.getElementById('bindModeAccount').classList.remove('hidden');
+      } else if(mode === 'register') {
+        document.getElementById('bindModeRegister').classList.remove('hidden');
+      }
+    }
+
+    function completeProvinceJumpBinding(mode) {
+      let message = '';
+      if(mode === 'auto') {
+        message = '✅ 自动匹配绑定成功\n✅ 省平台已下发 loginToken（30天有效期）\n\n正在跳转省平台...';
+      } else if(mode === 'account') {
+        message = '✅ 账号密码验证成功\n✅ 绑定完成，省平台已下发 loginToken（30天有效期）\n\n正在跳转省平台...';
+      } else if(mode === 'register') {
+        message = '✅ 账号创建成功\n✅ 绑定完成，省平台已下发 loginToken（30天有效期）\n⏳ 账号需等待管理员审核\n\n正在跳转省平台...';
+      }
+      
+      provinceBound = true;
+      updateBindingUI();
+      alert(message);
+      setTimeout(() => {
+        showPage('provinceJumpPage');
+      }, 800);
+    }
+
+    function updateBindingUI() {
+      // 省平台
+      if(provinceBound) {
+        document.getElementById('provinceStatus').textContent = '已绑定';
+        document.getElementById('provinceStatus').className = 'binding-status bound';
+        document.getElementById('provinceBoundInfo').classList.remove('hidden');
+        document.getElementById('provinceUnboundInfo').classList.add('hidden');
+        document.getElementById('provinceBindBtn').classList.add('hidden');
+        document.getElementById('provinceUnbindBtn').classList.remove('hidden');
+      } else {
+        document.getElementById('provinceStatus').textContent = '未绑定';
+        document.getElementById('provinceStatus').className = 'binding-status unbound';
+        document.getElementById('provinceBoundInfo').classList.add('hidden');
+        document.getElementById('provinceUnboundInfo').classList.remove('hidden');
+        document.getElementById('provinceBindBtn').classList.remove('hidden');
+        document.getElementById('provinceUnbindBtn').classList.add('hidden');
+      }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      updateBindingUI();
+    });
+    
+    // 点击外部关闭下拉菜单
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.user-avatar')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
+      }
+    });
+  </script>
+</body>
+</html>
