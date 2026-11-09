@@ -2157,11 +2157,11 @@
                     actionCell.appendChild(viewButton);
                     actionCell.appendChild(revokeButton);
                 } else {
-                    // 正常交易记录：显示"冲销记录"按钮
+                    // 正常交易记录：显示"冲销本记录"按钮
                     const actionButton = document.createElement('button');
                     actionButton.type = 'button';
                     actionButton.className = 'transaction-writeoff';
-                    actionButton.textContent = '冲销记录';
+                    actionButton.textContent = '冲销本记录';
                     actionButton.addEventListener('click', () => openWriteoffForm(id, record));
                     actionCell.appendChild(actionButton);
                 }
