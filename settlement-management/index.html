@@ -984,18 +984,21 @@
         .transaction-table th:nth-child(3),
         .transaction-table td:nth-child(3) { width: 100px; }
         .transaction-table th:nth-child(4),
-        .transaction-table td:nth-child(4) { width: 180px; }
+        .transaction-table td:nth-child(4) { width: 170px; }
         .transaction-table th:nth-child(5),
-        .transaction-table td:nth-child(5) { width: auto; min-width: 250px; }
+        .transaction-table td:nth-child(5) { width: 170px; }
         .transaction-table th:nth-child(6),
-        .transaction-table td:nth-child(6) { width: 100px; }
+        .transaction-table td:nth-child(6) { width: auto; min-width: 250px; }
+        .transaction-table th:nth-child(7),
+        .transaction-table td:nth-child(7) { width: 100px; }
         .transaction-table td { overflow: hidden; text-overflow: ellipsis; }
         .transaction-table td:nth-child(1),
         .transaction-table td:nth-child(2),
         .transaction-table td:nth-child(3),
         .transaction-table td:nth-child(4),
-        .transaction-table td:nth-child(6) { white-space: nowrap; }
-        .transaction-table td:nth-child(5) { white-space: normal; word-break: break-word; line-height: 1.5; }
+        .transaction-table td:nth-child(5),
+        .transaction-table td:nth-child(7) { white-space: nowrap; }
+        .transaction-table td:nth-child(6) { white-space: normal; word-break: break-word; line-height: 1.5; }
         .transaction-table tbody tr:hover td:last-child { background: #f9fbfc; }
         .transaction-empty { padding: 36px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
         .transaction-empty[hidden] { display: none; }
@@ -1755,12 +1758,17 @@
                             <div class="rule-item">
                                 <span class="rule-tag">数据范围</span>
                                 <div class="rule-title">交易记录数据展示</div>
-                                <div class="rule-content">1. 从未结算的账单（未执行过结算操作）：交易记录为空，显示"暂无请求成功的交易记录"；<br>2. 因冲销导致的未结算账单（曾经结算过）：保留并展示所有请求成功的交易记录；<br>3. 已结算/结算中状态：展示所有请求成功的交易记录，包括交易成功、交易失败、处理中等状态的记录；<br>4. 仅过滤"请求失败"的记录，"交易失败"的记录正常展示，并在备注栏显示失败理由。</div>
+                                <div class="rule-content">1. 从未结算的账单（未执行过结算操作）：交易记录为空，显示"暂无请求成功的交易记录"；<br>2. 因冲销导致的未结算账单（曾经结算过）：保留并展示所有请求成功的交易记录；<br>3. 已结算/结算中状态：展示所有请求成功的交易记录，状态包括交易成功、交易失败、交易中三种。交易中的记录完成时间显示"—"；<br>4. 仅过滤"请求失败"的记录，"交易失败"的记录正常展示，并在备注栏显示失败理由。</div>
                             </div>
                             <div class="rule-item">
                                 <span class="rule-tag">冲销规则</span>
                                 <div class="rule-title">冲销操作规则</div>
-                                <div class="rule-content">1. 冲销不生成新记录，而是直接标记原交易记录为已冲销状态；<br>2. 每条交易记录只能进行一次冲销操作，冲销后该记录备注栏自动填写"本交易已冲销"，操作栏显示"查看冲销凭证"和"撤销冲销"两个按钮；<br>3. 冲销时必须上传冲销凭证（仅支持图片格式）和填写冲销理由说明，两项均为必填项；<br>4. 交易失败的记录备注显示失败理由，操作栏显示"—"，不可冲销。</div>
+                                <div class="rule-content">1. 冲销不生成新记录，而是直接标记原交易记录为已冲销状态；<br>2. 每条交易记录只能进行一次冲销操作，冲销后该记录备注栏自动填写"本交易已冲销"，操作栏显示"查看冲销凭证"和"撤销冲销"两个按钮；<br>3. 冲销时必须上传冲销凭证（仅支持图片格式）和填写冲销理由说明，两项均为必填项；<br>4. 交易失败和交易中的记录操作栏显示"—"，不可冲销。交易失败的记录备注显示失败理由。</div>
+                            </div>
+                            <div class="rule-item">
+                                <span class="rule-tag">撤销限制</span>
+                                <div class="rule-title">撤销冲销的前置条件</div>
+                                <div class="rule-content">如果冲销后的结算账单重新发起了结算（即产生了新的交易记录），该冲销记录将不可再撤销，操作栏显示"不可撤销"按钮（禁用状态）。</div>
                             </div>
                             <div class="rule-item">
                                 <span class="rule-tag">冲销联动</span>
@@ -1768,7 +1776,7 @@
                                 <div class="rule-content">冲销操作会影响账单的结算状态统计：<br>1. 统计时自动排除已冲销的交易记录（标记为isWrittenOff=true的记录）；<br>2. 如果账单冲销前只有1条未冲销且状态为"交易成功"的记录，冲销后该账单的结算状态将自动变更为"未结算"，结算按钮恢复为可点击状态，允许再次发起结算操作。</div>
                             </div>
                             <div class="rule-item">
-                                <span class="rule-tag">撤销规则</span>
+                                <span class="rule-tag">撤销操作</span>
                                 <div class="rule-title">撤销冲销操作</div>
                                 <div class="rule-content">1. 已冲销的记录支持撤销操作，点击"撤销冲销"按钮会弹出确认对话框；<br>2. 确认后该交易记录恢复为可冲销状态：移除冲销标记（isWrittenOff）、删除冲销凭证和理由信息，备注清空，操作栏恢复为"冲销记录"按钮；<br>3. 如果撤销后账单只剩1条未冲销且状态为"交易成功"的记录，账单状态将从"未结算"恢复为"已结算"，结算按钮恢复为不可点击状态。</div>
                             </div>
@@ -1803,7 +1811,8 @@
                             <th>序号</th>
                             <th>交易流水号</th>
                             <th>交易状态</th>
-                            <th>交易时间</th>
+                            <th>发起时间</th>
+                            <th>完成时间</th>
                             <th>备注</th>
                             <th>操作</th>
                         </tr>
@@ -1995,19 +2004,19 @@
 
         const transactionRecordsByBill = {
             1: [
-                { serial: 'JY202610251030001', status: '交易成功', time: '2026-10-25 10:30', requestSucceeded: true },
-                { serial: 'JY202610251025002', status: '交易失败', time: '2026-10-25 10:25', requestSucceeded: true, remark: '支付账户余额不足' },
-                { serial: 'JY202610251020003', status: '请求失败', time: '2026-10-25 10:20', requestSucceeded: false }
+                { serial: 'JY202610251030001', status: '交易成功', startTime: '2026-10-25 10:30:00', endTime: '2026-10-25 10:32:15', requestSucceeded: true, timestamp: 1729825920000 },
+                { serial: 'JY202610251025002', status: '交易失败', startTime: '2026-10-25 10:25:00', endTime: '2026-10-25 10:26:43', requestSucceeded: true, remark: '支付账户余额不足', timestamp: 1729825620000 },
+                { serial: 'JY202610251020003', status: '请求失败', startTime: '2026-10-25 10:20:00', endTime: '2026-10-25 10:20:05', requestSucceeded: false, timestamp: 1729825320000 }
             ],
             2: [],
             3: [
-                { serial: 'JY202610161145001', status: '处理中', time: '2026-10-16 11:45', requestSucceeded: true },
-                { serial: 'JY202610161140002', status: '交易失败', time: '2026-10-16 11:40', requestSucceeded: true, remark: '银行卡状态异常' }
+                { serial: 'JY202610161145001', status: '交易中', startTime: '2026-10-16 11:45:00', endTime: '', requestSucceeded: true, timestamp: 1729047900000 },
+                { serial: 'JY202610161140002', status: '交易失败', startTime: '2026-10-16 11:40:00', endTime: '2026-10-16 11:41:28', requestSucceeded: true, remark: '银行卡状态异常', timestamp: 1729047600000 }
             ],
             4: [
-                { serial: 'JY202610161410001', status: '交易失败', time: '2026-10-16 14:10', requestSucceeded: true, remark: '交易超时' },
-                { serial: 'JY202610161405002', status: '请求失败', time: '2026-10-16 14:05', requestSucceeded: false },
-                { serial: 'JY202610161400003', status: '交易成功', time: '2026-10-16 14:00', requestSucceeded: true }
+                { serial: 'JY202610161410001', status: '交易失败', startTime: '2026-10-16 14:10:00', endTime: '2026-10-16 14:13:21', requestSucceeded: true, remark: '交易超时', timestamp: 1729056600000 },
+                { serial: 'JY202610161405002', status: '请求失败', startTime: '2026-10-16 14:05:00', endTime: '2026-10-16 14:05:02', requestSucceeded: false, timestamp: 1729056300000 },
+                { serial: 'JY202610161400003', status: '交易成功', startTime: '2026-10-16 14:00:00', endTime: '2026-10-16 14:01:52', requestSucceeded: true, timestamp: 1729056000000 }
             ],
             5: []
         };
@@ -2063,6 +2072,7 @@
             delete record.isWrittenOff;
             delete record.voucher;
             delete record.reason;
+            delete record.writeoffTimestamp;
             
             // 检查是否需要恢复账单状态：统计交易成功且未冲销的记录数
             const successfulRecordsAfterRevoke = transactionRecordsByBill[billId].filter(r => r.requestSucceeded && !r.isWrittenOff && r.status === '交易成功').length;
@@ -2128,7 +2138,7 @@
                     remarkText = record.remark || '';
                 }
                 
-                const values = [String(index + 1), record.serial, record.status, record.time, remarkText];
+                const values = [String(index + 1), record.serial, record.status, record.startTime, record.endTime || '—', remarkText];
                 values.forEach(value => {
                     const cell = document.createElement('td');
                     cell.textContent = value;
@@ -2136,8 +2146,8 @@
                 });
                 const actionCell = document.createElement('td');
                 
-                if (record.status === '交易失败') {
-                    // 交易失败的记录，操作栏显示"—"
+                if (record.status === '交易失败' || record.status === '交易中') {
+                    // 交易失败和交易中的记录，操作栏显示"—"
                     actionCell.textContent = '—';
                 } else if (record.isWrittenOff) {
                     // 已冲销的记录：显示"查看冲销凭证"和"撤销冲销"按钮
@@ -2148,11 +2158,24 @@
                     viewButton.style.marginRight = '8px';
                     viewButton.addEventListener('click', () => openVoucherPreview(record));
                     
+                    // 检查是否可以撤销：如果冲销后有新的交易记录，则不可撤销
+                    const writeoffTimestamp = record.writeoffTimestamp || record.timestamp;
+                    const hasNewerRecords = records.some(r => r.requestSucceeded && r.timestamp > writeoffTimestamp && r.serial !== record.serial);
+                    
                     const revokeButton = document.createElement('button');
                     revokeButton.type = 'button';
                     revokeButton.className = 'transaction-writeoff';
-                    revokeButton.textContent = '撤销冲销';
-                    revokeButton.addEventListener('click', () => revokeWriteoff(id, record));
+                    
+                    if (hasNewerRecords) {
+                        revokeButton.textContent = '不可撤销';
+                        revokeButton.disabled = true;
+                        revokeButton.style.opacity = '0.5';
+                        revokeButton.style.cursor = 'not-allowed';
+                        revokeButton.title = '账单已重新发起结算，冲销记录不可撤销';
+                    } else {
+                        revokeButton.textContent = '撤销冲销';
+                        revokeButton.addEventListener('click', () => revokeWriteoff(id, record));
+                    }
                     
                     actionCell.appendChild(viewButton);
                     actionCell.appendChild(revokeButton);
@@ -2281,10 +2304,11 @@
                 // 检查冲销前交易成功且未冲销的记录数量
                 const successfulRecordsBeforeWriteoff = transactionRecordsByBill[billId].filter(r => r.requestSucceeded && !r.isWrittenOff && r.status === '交易成功').length;
                 
-                // 标记原交易记录为已冲销，保存凭证和理由
+                // 标记原交易记录为已冲销，保存凭证、理由和冲销时间戳
                 record.isWrittenOff = true;
                 record.voucher = voucher;
                 record.reason = reason;
+                record.writeoffTimestamp = Date.now();
                 
                 // 如果冲销前只有一条交易成功的记录（不含已冲销的），修改账单状态为未结算
                 if (successfulRecordsBeforeWriteoff === 1) {
