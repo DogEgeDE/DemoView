@@ -1768,7 +1768,7 @@
                             <div class="rule-item">
                                 <span class="rule-tag">撤销限制</span>
                                 <div class="rule-title">撤销冲销的前置条件</div>
-                                <div class="rule-content">如果冲销后的结算账单重新发起了结算（即产生了新的交易记录），该冲销记录将不可再撤销，操作栏显示"不可撤销"按钮（禁用状态）。</div>
+                                <div class="rule-content">如果冲销后的结算账单重新发起了结算，所有已冲销记录将立即锁定为不可撤销状态。点击结算按钮发起新结算后，账单状态变为结算中，所有已冲销记录的操作栏显示"不可撤销"按钮（禁用状态）。</div>
                             </div>
                             <div class="rule-item">
                                 <span class="rule-tag">冲销联动</span>
@@ -1778,7 +1778,7 @@
                             <div class="rule-item">
                                 <span class="rule-tag">撤销操作</span>
                                 <div class="rule-title">撤销冲销操作</div>
-                                <div class="rule-content">1. 已冲销的记录支持撤销操作，点击"撤销冲销"按钮会弹出确认对话框；<br>2. 确认后该交易记录恢复为可冲销状态：移除冲销标记（isWrittenOff）、删除冲销凭证和理由信息，备注清空，操作栏恢复为"冲销记录"按钮；<br>3. 如果撤销后账单只剩1条未冲销且状态为"交易成功"的记录，账单状态将从"未结算"恢复为"已结算"，结算按钮恢复为不可点击状态。</div>
+                                <div class="rule-content">1. 已冲销的记录支持撤销操作，点击"撤销冲销"按钮会弹出确认对话框；<br>2. 确认后该交易记录恢复为可冲销状态：移除冲销标记（isWrittenOff）、删除冲销凭证和理由信息，备注清空，操作栏恢复为"冲销本记录"按钮；<br>3. 如果撤销后账单只剩1条未冲销且状态为"交易成功"的记录，账单状态将从"未结算"恢复为"已结算"，结算按钮恢复为不可点击状态。</div>
                             </div>
                             <div class="rule-item">
                                 <span class="rule-tag">凭证查看</span>
@@ -1995,7 +1995,53 @@
         }
 
         function settle(id) {
-            alert('执行结算 - ID: ' + id);
+            // 获取该账单的交易记录数组
+            const records = transactionRecordsByBill[id] || (transactionRecordsByBill[id] = []);
+            
+            // 给所有已冲销记录打上"冲销后重新结算"标记
+            records.forEach(r => {
+                if (r.isWrittenOff) {
+                    r.resettledAfterWriteoff = true;
+                }
+            });
+            
+            // 创建新的交易记录（状态为"交易中"）
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+            const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+            const timestamp = `${dateStr} ${timeStr}`;
+            
+            records.unshift({
+                serial: 'JY' + timestamp.replace(/\D/g, ''),
+                status: '交易中',
+                startTime: timestamp,
+                endTime: '',
+                requestSucceeded: true,
+                timestamp: now.getTime()
+            });
+            
+            // 标记账单曾经结算过
+            billEverSettled[id] = true;
+            
+            // 更新表格行的状态和按钮
+            const billRow = Array.from(document.querySelectorAll('.table-section tbody tr')).find(row => {
+                return Number(row.cells[0]?.textContent.trim()) === id;
+            });
+            
+            if (billRow) {
+                // 更新状态列为"结算中"
+                billRow.cells[11].innerHTML = '<span class="status-tag pending">结算中</span>';
+                
+                // 禁用结算按钮
+                const settleLink = Array.from(billRow.cells[14].querySelectorAll('a.action-link')).find(l => l.textContent.trim() === '结算');
+                if (settleLink) {
+                    settleLink.classList.add('disabled');
+                    settleLink.removeAttribute('onclick');
+                }
+            }
+            
+            alert('已发起结算，所有已冲销的交易记录将锁定为不可撤销状态');
         }
 
         function viewSettlementConfirmation(id) {
@@ -2066,6 +2112,12 @@
         }
 
         function revokeWriteoff(billId, record) {
+            // 检查是否已在冲销后重新结算
+            if (record.resettledAfterWriteoff) {
+                alert('账单已重新发起结算，此冲销记录已锁定，不可撤销');
+                return;
+            }
+            
             if (!confirm('确认撤销此冲销操作吗？')) return;
             
             // 恢复原交易记录状态
@@ -2158,7 +2210,7 @@
                     viewButton.style.marginRight = '8px';
                     viewButton.addEventListener('click', () => openVoucherPreview(record));
                     
-                    // 检查是否可以撤销：如果冲销后有新的交易记录，则不可撤销
+                    // 检查是否可以撤销：如果冲销后重新结算或有新的交易记录，则不可撤销
                     const writeoffTimestamp = record.writeoffTimestamp || record.timestamp;
                     const hasNewerRecords = records.some(r => r.requestSucceeded && r.timestamp > writeoffTimestamp && r.serial !== record.serial);
                     
@@ -2166,7 +2218,7 @@
                     revokeButton.type = 'button';
                     revokeButton.className = 'transaction-writeoff';
                     
-                    if (hasNewerRecords) {
+                    if (record.resettledAfterWriteoff || hasNewerRecords) {
                         revokeButton.textContent = '不可撤销';
                         revokeButton.disabled = true;
                         revokeButton.style.opacity = '0.5';
