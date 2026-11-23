@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XXXXX机构 · 机构端原型</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./menu-config.js" defer></script>
+  <script src="./evaluation-data.js" defer></script>
+  <script src="./app.js" defer></script>
+  <script src="./evaluation.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar__identity">
+        <span class="topbar__mark" aria-hidden="true"></span>
+        <span class="topbar__organization">XXXXX机构</span>
+        <span class="topbar__divider" aria-hidden="true"></span>
+        <span class="topbar__product">机构管理平台</span>
+      </div>
+      <div class="topbar__account">
+        <span class="topbar__avatar" aria-hidden="true">演</span>
+        <span class="topbar__username">演示用户</span>
+        <span class="topbar__account-divider" aria-hidden="true"></span>
+        <button class="topbar__logout" type="button" id="logout-button" aria-label="登出（演示入口）">登出</button>
+      </div>
+    </header>
+    <div class="workspace">
+      <aside class="sidebar" aria-label="侧边导航">
+        <div class="sidebar__intro">
+          <h2>工作导航</h2>
+        </div>
+        <nav id="navigation" class="sidebar__navigation" aria-label="功能导航"></nav>
+      </aside>
+      <main class="content" id="main-content" tabindex="-1">
+        <div class="content__heading">
+          <div id="breadcrumb" class="breadcrumb" aria-label="当前位置"></div>
+        </div>
+        <div id="page-content" aria-live="polite"></div>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+</body>
+</html>
